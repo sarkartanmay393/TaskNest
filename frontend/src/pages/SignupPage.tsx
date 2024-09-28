@@ -1,84 +1,126 @@
-import React from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { headers } from "../worker/WebWorker";
-import { baseUrl } from "../lib/network";
+import { useForm } from 'react-hook-form'
+
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { signUpApi } from "~/lib/apis";
+
+type FormData = {
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  confirmPassword: string
+}
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [error, setError] = React.useState("");
-  const [isLoading, setIsLoading] = React.useState(false);
+  const { register, handleSubmit, formState: { errors }, watch } = useForm<FormData>()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = async () => {
-    setError("");
-    setIsLoading(true);
-
-    const credentials = JSON.stringify({
-      email: email,
-      password: password,
-    });
-
+  const onSubmit = async (data: FormData) => {
     try {
-      const resp = await fetch(baseUrl + '/api/signup', {
-        method: 'POST',
-        headers: headers,
-        body: credentials,
-      });
+      setIsSubmitting(true);
+      const { user, token } = await signUpApi({ name: data.firstName, email: data.email, password: data.password });
+      sessionStorage.setItem("accessToken", token);
+      sessionStorage.setItem("user", JSON.stringify(user));
+      navigate('/')
+    } catch (error: unknown) {
 
-      const newUser = await resp.json();
-      if (resp.status === 401) {
-        setError(newUser);
-      } else {
-        setEmail("");
-        setPassword("");
-        navigate('/')
-      }
-
-      setIsLoading(false);
-    }
-    catch (error) {
-      setError(`${error}`)
-      console.log(`Error appeared: ${error}`)
-    };
-
-  }
-
-
-  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    switch (e.target.name) {
-      case "email": {
-        setEmail(() => e.target.value);
-        break;
-      }
-      case "password": {
-        setPassword(() => e.target.value);
-        break;
-      }
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[100vh]">
-      <div className="grid p-4 w-full md:w-[50%] lg:w-[30%] rounded-[2px] border-[1px] border-solid border-black gap-2 bg-green-100 mt-[-2rem]">
-        <h2 className="text-[3rem] font-[500] mt-[-0.6rem]">
-          Signup
-        </h2>
-        <p className="text-[1rem] font-[400] ">
-          Alreay got one! <a className="inline font-[500]" href="/login">Login here</a>
-        </p>
-        <div className="grid gap-2">
-          <input className="h-[36px] px-2 rounded-[2px] border-[1px] border-solid border-black"
-            name="email" type="text" value={email} onChange={handleOnChange} placeholder="Type your Email" />
-          <input className="h-[36px] px-2 rounded-[2px] border-[1px] border-solid border-black"
-            name="password" type="password" value={password} onChange={handleOnChange} placeholder="A Strong Password" />
-          <button className="h-[28px] px-2 rounded-[2px] border-[1px] border-solid border-black cursor-pointer font-[500] bg-pink-100 hover:bg-pink-200"
-            type="button" onClick={handleSubmit}>{isLoading ? '⏳' : "Submit"}</button>
-          <div style={{ display: error ? 'flex' : 'none' }} className="min-h-[28px] items-center px-2 rounded-[2px] cursor-pointer text-md bg-red-300 hover:bg-pink-200">
-            {error && error}
-          </div>
+    <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md border-2 border-blue-500">
+      <h2 className="text-3xl font-bold text-blue-500 mb-6">Signup</h2>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="firstName">First Name</Label>
+          <Input 
+            id="firstName" 
+            {...register("firstName", { required: "First name is required" })}
+            aria-invalid={errors.firstName ? "true" : "false"}
+          />
+          {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName.message}</p>}
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input 
+            id="lastName" 
+            {...register("lastName", { required: "Last name is required" })}
+            aria-invalid={errors.lastName ? "true" : "false"}
+          />
+          {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input 
+            id="email" 
+            type="email" 
+            {...register("email", { 
+              required: "Email is required",
+              pattern: {
+                value: /\S+@\S+\.\S+/,
+                message: "Invalid email address",
+              }
+            })}
+            aria-invalid={errors.email ? "true" : "false"}
+          />
+          {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input 
+            id="password" 
+            type="password" 
+            {...register("password", { 
+              required: "Password is required",
+              minLength: {
+                value: 8,
+                message: "Password must be at least 8 characters long",
+              }
+            })}
+            aria-invalid={errors.password ? "true" : "false"}
+          />
+          {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Input 
+            id="confirmPassword" 
+            type="password" 
+            {...register("confirmPassword", { 
+              required: "Please confirm your password",
+              validate: (val: string) => {
+                if (watch('password') != val) {
+                  return "Your passwords do not match";
+                }
+              }
+            })}
+            aria-invalid={errors.confirmPassword ? "true" : "false"}
+          />
+          {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>}
+        </div>
+        <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white" disabled={isSubmitting}>
+          {isSubmitting ? 'Signing up...' : 'Signup'}
+        </Button>
+      </form>
+      <div className="mt-4 text-center">
+        <p className="text-sm text-gray-600">
+          Already have an account?{" "}
+          <a href="/login" className="text-blue-500 hover:underline">
+            Login
+          </a>
+        </p>
+      </div>
+      <div className="mt-4">
+        <Button variant="outline" className="w-full border-blue-500 text-blue-500 hover:bg-blue-50">
+          Signup with Google
+        </Button>
       </div>
     </div>
   );

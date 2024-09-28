@@ -1,103 +1,83 @@
-import React from "react";
+import { useState } from "react";
+import { useForm } from 'react-hook-form'
 import { useNavigate } from "react-router-dom";
-import { headers } from "../worker/WebWorker";
-import { baseUrl } from "../lib/network";
+
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { loginApi } from "~/lib/apis";
+
+type FormData = {
+  email: string
+  password: string
+}
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [error, setError] = React.useState("");
-  const [isLoading, setIsLoading] = React.useState(false);
+  const { register, handleSubmit, formState: { errors } } = useForm<FormData>()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = async () => {
-    setError("");
-    setIsLoading(true);
-
-    const credentials = JSON.stringify({
-      email: email,
-      password: password,
-    });
-
+  const onSubmit = async (data: FormData) => {
     try {
-      const response = await fetch(baseUrl + "/api/login", {
-        method: "POST",
-        headers: headers,
-        body: credentials,
-        credentials: "include",
-      });
-
-      const { user, token } = await response.json();
-      if (response.status === 401) {
-        setError(user);
-      } else {
-        sessionStorage.setItem("accessToken", token);
-        sessionStorage.setItem("user", JSON.stringify(user));
-        setEmail("");
-        setPassword("");
-        navigate("/");
-      
-      setIsLoading(false);}
-    } catch (error: any) {
-      setError(error.error);
-    }
-  };
-
-  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    switch (e.target.name) {
-      case "email": {
-        setEmail(() => e.target.value);
-        break;
-      }
-      case "password": {
-        setPassword(() => e.target.value);
-        break;
-      }
+      setIsSubmitting(true);
+      const { user, token } = await loginApi(data);
+      sessionStorage.setItem("accessToken", token);
+      sessionStorage.setItem("user", JSON.stringify(user));
+      navigate("/");
+    } catch (error: unknown) {
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[100vh]">
-      <div className="grid p-4 w-full md:w-[50%] lg:w-[30%] rounded-[2px] border-[1px] border-solid border-black gap-2 bg-green-100 mt-[-2rem]">
-        <h2 className="text-[3rem] font-[500] mt-[-0.6rem]">Login</h2>
-        <p className="text-[1rem] font-[400] ">
-          First Timers!{" "}
-          <a className="inline font-[500]" href="/signup">
-            Create an account
+    <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md border-2 border-blue-500">
+      <h2 className="text-3xl font-bold text-blue-500 mb-6">Login</h2>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input 
+            id="email" 
+            type="email" 
+            {...register("email", { 
+              required: "Email is required",
+              pattern: {
+                value: /\S+@\S+\.\S+/,
+                message: "Invalid email address",
+              }
+            })}
+            aria-invalid={errors.email ? "true" : "false"}
+          />
+          {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input 
+            id="password" 
+            type="password" 
+            {...register("password", { 
+              required: "Password is required",
+            })}
+            aria-invalid={errors.password ? "true" : "false"}
+          />
+          {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+        </div>
+        <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white" disabled={isSubmitting}>
+          {isSubmitting ? 'Logging in...' : 'Login'}
+        </Button>
+      </form>
+      <div className="mt-4 text-center">
+        <p className="text-sm text-gray-600">
+          Don't have an account?{" "}
+          <a href="/signup" className="text-blue-500 hover:underline">
+            Sign up
           </a>
         </p>
-        <div id="form-div" className="grid gap-2">
-          <input
-            className="h-[36px] px-2 rounded-[2px] border-[1px] border-solid border-black"
-            name="email"
-            type="text"
-            value={email}
-            onChange={handleOnChange}
-            placeholder="Type your Email"
-          />
-          <input
-            className="h-[36px] px-2 rounded-[2px] border-[1px] border-solid border-black"
-            name="password"
-            type="password"
-            value={password}
-            onChange={handleOnChange}
-            placeholder="A Strong Password"
-          />
-          <button
-            className="h-[28px] px-2 rounded-[2px] border-[1px] border-solid border-black cursor-pointer font-[500] bg-pink-100 hover:bg-pink-200"
-            type="submit"
-            onClick={handleSubmit}
-          >
-            {isLoading ? "⏳" : "Submit"}
-          </button>
-          <div
-            style={{ display: error ? "flex" : "none" }}
-            className="min-h-[28px] items-center px-2 rounded-[2px] cursor-pointer text-md bg-red-300 hover:bg-pink-200"
-          >
-            {error && error}
-          </div>
-        </div>
+      </div>
+      <div className="mt-4">
+        <Button variant="outline" className="w-full border-blue-500 text-blue-500 hover:bg-blue-50">
+          Login with Google
+        </Button>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Board from "../components/Board";
@@ -6,6 +6,33 @@ import { useStoreActions, useStoreState } from "../state/typedHooks";
 import { ITask, TASK_STATUS } from "../interfaces";
 import Loading from "../components/Loading";
 import { getTasksApi, logOutApi } from "../lib/apis";
+
+
+import { Button } from "~/components/ui/button"
+import { Input } from "~/components/ui/input"
+import { Textarea } from "~/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "~/components/ui/dialog"
+import { PlusIcon } from 'lucide-react'
+
+// Types
+type Task = {
+  id: string
+  title: string
+  description: string
+  status: 'TODO' | 'IN PROGRESS' | 'DONE'
+  createdAt: string
+}
+
+// Mock data
+const initialTasks: Task[] = [
+  { id: '1', title: 'Task 1', description: 'Description 1', status: 'TODO', createdAt: '2023/05/01 09:00:00' },
+  { id: '2', title: 'Task 2', description: 'Description 2', status: 'TODO', createdAt: '2023/05/02 10:30:00' },
+  { id: '3', title: 'Task 3', description: 'Description 3', status: 'TODO', createdAt: '2023/05/03 11:45:00' },
+  { id: '4', title: 'Task 4', description: 'Description 4', status: 'IN PROGRESS', createdAt: '2023/05/04 14:15:00' },
+  { id: '5', title: 'Task 5', description: 'Description 5', status: 'IN PROGRESS', createdAt: '2023/05/05 16:30:00' },
+  { id: '6', title: 'Task 6', description: 'Description 6', status: 'DONE', createdAt: '2023/05/06 18:00:00' },
+]
 
 export default function BoardPage() {
   const navigateTo = useNavigate();
@@ -54,40 +81,90 @@ export default function BoardPage() {
     window.history.back();
   }
 
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortOrder, setSortOrder] = useState('recent')
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [isAddNewModalOpen, setIsAddNewModalOpen] = useState(false)
+
+  const filteredTasks = tasks.filter(task =>
+    task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    task.description.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    if (sortOrder === 'recent') {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    } else {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    }
+  })
+
+  const addNewTask = (newTask: Omit<Task, 'id' | 'createdAt'>) => {
+    const task: Task = {
+      ...newTask,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+    }
+    // setTasks([...tasks, task])
+    setIsAddNewModalOpen(false)
+  }
+
+  const openTaskModal = (task: Task) => {
+    setSelectedTask(task)
+  }
+
+  const closeTaskModal = () => {
+    setSelectedTask(null)
+  }
+
+  const openEditModal = (task: Task) => {
+    setEditingTask({ ...task })
+  }
+
+  const closeEditModal = () => {
+    setEditingTask(null)
+  }
+
+  const handleEditTask = (updatedTask: Task) => {
+    // setTasks(tasks.map(task => task.id === updatedTask.id ? updatedTask : task))
+    closeEditModal()
+  }
+
   return (
-    <div className="flex flex-col items-center w-[100%] h-[100%] bg-gray-100">
-      <img
-        alt=""
-        width={24}
-        onClick={handleGoBack}
-        className="absolute left-8 top-6 cursor-pointer"
-        src="https://cdn1.iconfinder.com/data/icons/duotone-essentials/24/chevron_backward-512.png" />
-      <div className="flex flex-col items-center w-[100%] h-[100%] ">
-        <img
-          className="absolute right-8 top-6 cursor-pointer"
-          width={24}
-          alt=""
-          onClick={handleLogout}
-          src="https://www.svgrepo.com/show/135250/logout.svg"
+    <div className="container mx-auto p-4">
+      <header className="flex justify-between items-center mb-6">
+        <div className="text-2xl font-bold text-blue-600">Task Manager</div>
+        <Button onClick={() => setIsAddNewModalOpen(true)} className="bg-blue-500 hover:bg-blue-600">
+          <PlusIcon className="mr-2 h-4 w-4" /> Add New
+        </Button>
+      </header>
+      <div className="flex justify-between items-center mb-6">
+        <Input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-sm"
         />
-        <h3 className="text-[2.4rem] font-[500] ">Personal Board</h3>
-        <p className="text-[1rem] font-[500] ">
-          Manage your daily/weekly tasks here.
-        </p>
-        <img
-          onClick={handleNewTask}
-          className="border-[0.1px] border-solid border-gray-400 rounded-[6px] my-4 cursor-pointer p-1"
-          width={36}
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Plus_symbol.svg/500px-Plus_symbol.svg.png"
-          alt=""
-          style={{ boxShadow: "1px 0.4px 4px 0.3px lightgreen" }}
-        />
-        {isLoading ? (
-          <Loading loading={isLoading} />
-        ) : (
-          <Board className="" />
-        )}
+        <Select value={sortOrder} onValueChange={setSortOrder}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="recent">Most Recent</SelectItem>
+            <SelectItem value="oldest">Oldest</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <TaskColumn title="TODO" tasks={sortedTasks.filter(task => task.status === 'TODO')} onTaskClick={openTaskModal} onEditClick={openEditModal} />
+        <TaskColumn title="IN PROGRESS" tasks={sortedTasks.filter(task => task.status === 'IN PROGRESS')} onTaskClick={openTaskModal} onEditClick={openEditModal} />
+        <TaskColumn title="DONE" tasks={sortedTasks.filter(task => task.status === 'DONE')} onTaskClick={openTaskModal} onEditClick={openEditModal} />
+      </div>
+      <TaskModal isOpen={!!selectedTask} onClose={closeTaskModal} task={selectedTask} />
+      <EditTaskModal isOpen={!!editingTask} onClose={closeEditModal} task={editingTask} onSave={handleEditTask} />
+      <AddNewTaskModal isOpen={isAddNewModalOpen} onClose={() => setIsAddNewModalOpen(false)} onAdd={addNewTask} />
     </div>
   );
 }

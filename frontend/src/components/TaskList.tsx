@@ -1,7 +1,7 @@
 import { DroppableProvided } from "react-beautiful-dnd";
 
 import { ITask } from "../interfaces";
-import Task from "./Task";
+import Task from "./TaskCard";
 
 interface TaskListProps {
   tasks: ITask[];

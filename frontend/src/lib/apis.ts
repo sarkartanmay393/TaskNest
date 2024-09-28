@@ -1,5 +1,43 @@
 import { headers } from "../worker/WebWorker";
 import { baseUrl } from "./network";
+import { LoginPayload, SignUpPayload } from "./types";
+
+export const signUpApi = async (payload: SignUpPayload) => {
+  try {
+    const { user, token, error } = await fetch(baseUrl + "/api/signup", {
+      method: "POST",
+      headers: headers,
+      credentials: "include",
+      body: JSON.stringify(payload),
+    }) as any;
+    if (error) {
+      throw new Error(error);
+    }
+
+    return { user, token };
+  } catch (err: any) {
+    console.error(err);
+    throw new Error(err);
+  }
+};
+
+export const loginApi = async (payload: LoginPayload) => {
+  try {
+    const { user, token, error } = await fetch(baseUrl + "/api/login", {
+      method: "POST",
+      headers: headers,
+      credentials: "include",
+      body: JSON.stringify(payload),
+    }) as any;
+    if (error) {
+      throw new Error(error);
+    }
+    return { user, token };
+  } catch (err: any) {
+    console.error(err);
+    throw new Error(err);
+  }
+};
 
 export const logOutApi = async (navigateTo: any) => {
   try {
