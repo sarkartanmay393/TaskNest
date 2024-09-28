@@ -1,5 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { headers } from "../worker/WebWorker";
+import { baseUrl } from "../lib/network";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -7,6 +9,53 @@ export default function LoginPage() {
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+
+  const handleSubmit = async () => {
+    setError("");
+    setIsLoading(true);
+
+    const credentials = JSON.stringify({
+      email: email,
+      password: password,
+    });
+
+    try {
+      const response = await fetch(baseUrl + "/api/login", {
+        method: "POST",
+        headers: headers,
+        body: credentials,
+        credentials: "include",
+      });
+
+      const { user, token } = await response.json();
+      if (response.status === 401) {
+        setError(user);
+      } else {
+        sessionStorage.setItem("accessToken", token);
+        sessionStorage.setItem("user", JSON.stringify(user));
+        setEmail("");
+        setPassword("");
+        navigate("/");
+      
+      setIsLoading(false);}
+    } catch (error: any) {
+      setError(error.error);
+    }
+  };
+
+  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    switch (e.target.name) {
+      case "email": {
+        setEmail(() => e.target.value);
+        break;
+      }
+      case "password": {
+        setPassword(() => e.target.value);
+        break;
+      }
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-[100vh]">

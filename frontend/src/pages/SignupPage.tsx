@@ -1,5 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { headers } from "../worker/WebWorker";
+import { baseUrl } from "../lib/network";
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -8,6 +10,39 @@ export default function SignupPage() {
   const [error, setError] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
 
+  const handleSubmit = async () => {
+    setError("");
+    setIsLoading(true);
+
+    const credentials = JSON.stringify({
+      email: email,
+      password: password,
+    });
+
+    try {
+      const resp = await fetch(baseUrl + '/api/signup', {
+        method: 'POST',
+        headers: headers,
+        body: credentials,
+      });
+
+      const newUser = await resp.json();
+      if (resp.status === 401) {
+        setError(newUser);
+      } else {
+        setEmail("");
+        setPassword("");
+        navigate('/')
+      }
+
+      setIsLoading(false);
+    }
+    catch (error) {
+      setError(`${error}`)
+      console.log(`Error appeared: ${error}`)
+    };
+
+  }
 
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
