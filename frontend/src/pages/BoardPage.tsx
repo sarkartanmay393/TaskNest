@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 
-import { useStoreActions, useStoreState } from "../state/typedHooks";
-import { ITask, TASK_STATUS } from "../interfaces";
+import { useStoreActions } from "../state/typedHooks";
+import { IColumn, ITask } from "../interfaces";
 import { getTasksApi } from "../lib/apis";
-
 
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
@@ -11,75 +10,43 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~
 import { PlusIcon } from 'lucide-react'
 import Column from "~/components/Column";
 import { AddNewTaskModal, EditTaskModal, TaskModal } from "~/components/Modals";
-import { DragDropContext, DropResult, ResponderProvided } from "react-beautiful-dnd";
+import { DragDropContext, DropResult } from "react-beautiful-dnd";
 
-
-// Mock data
-const initialTasks: ITask[] = [
+const columns: IColumn[] = [
   {
-    id: 1,
-    title: 'Task 1',
-    description: 'Description 1', status: TASK_STATUS.TODO, createdAt: '2023/05/01 09:00:00',
-    columnId: 1,
-    column: undefined,
-    userId: 0,
-    user: undefined,
-    updatedAt: ""
+    "id": 1,
+    "title": "TODO",
+    tasks: []
   },
   {
-    id: 2, title: 'Task 2', description: 'Description 2', status: TASK_STATUS.TODO, createdAt: '2023/05/02 10:30:00',
-    columnId: 1,
-    column: undefined,
-    userId: 0,
-    user: undefined,
-    updatedAt: ""
+    "id": 2,
+    "title": "IN PROGRESS",
+    tasks: []
   },
   {
-    id: 3, title: 'Task 3', description: 'Description 3', status: TASK_STATUS.TODO, createdAt: '2023/05/03 11:45:00',
-    columnId: 1,
-    column: undefined,
-    userId: 0,
-    user: undefined,
-    updatedAt: ""
-  },
-  {
-    id: 4, title: 'Task 4', description: 'Description 4', status: TASK_STATUS.INPROGRESS, createdAt: '2023/05/04 14:15:00',
-    columnId: 2,
-    column: undefined,
-    userId: 0,
-    user: undefined,
-    updatedAt: ""
-  },
-  {
-    id: 5, title: 'Task 5', description: 'Description 5', status: TASK_STATUS.INPROGRESS, createdAt: '2023/05/05 16:30:00',
-    columnId: 2,
-    column: undefined,
-    userId: 0,
-    user: undefined,
-    updatedAt: ""
-  },
-  {
-    id: 6, title: 'Task 6', description: 'Description 6', status: TASK_STATUS.COMPLETED, createdAt: '2023/05/06 18:00:00',
-    columnId: 3,
-    column: undefined,
-    userId: 0,
-    user: undefined,
-    updatedAt: ""
-  },
-]
+    "id": 3,
+    "title": "COMPLETED",
+    tasks: []
+  }
+];
 
 export default function BoardPage() {
-  const { isLoading, tasks, columns } = useStoreState((state) => state);
-  const { addTask, setTasks, setIsLoading, setColumns } =
+  // useStoreState((state) => state);
+  const { setTasks, setIsLoading } =
     useStoreActions((action) => action);
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortOrder, setSortOrder] = useState('recent');
+    const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
+    const [editingTask, setEditingTask] = useState<ITask | null>(null);
+    const [isAddNewModalOpen, setIsAddNewModalOpen] = useState(false)
 
   useEffect(() => {
     (async () => {
       try {
         setIsLoading(true);
-        const { tasks, columns } = await getTasksApi({}) as any;
-        setTasks(initialTasks);
-        setColumns(columns);
+        const { tasks } = await getTasksApi({}) as any;
+        setTasks(tasks);
       } catch (err) {
         console.log(err);
       } finally {
@@ -88,34 +55,13 @@ export default function BoardPage() {
     })();
   }, []);
 
-  const [searchTerm, setSearchTerm] = useState('')
-  const [sortOrder, setSortOrder] = useState('recent')
-  const [selectedTask, setSelectedTask] = useState<ITask | null>(null)
-  const [editingTask, setEditingTask] = useState<ITask | null>(null)
-  const [isAddNewModalOpen, setIsAddNewModalOpen] = useState(false)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      
+    }, 5000);
 
-  const filteredTasks = tasks.filter(task =>
-    task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    task.description.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
-  const sortedTasks = [...filteredTasks].sort((a, b) => {
-    if (sortOrder === 'recent') {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    } else {
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    }
-  })
-
-  const addNewTask = (newTask: Omit<ITask, 'id' | 'createdAt'>) => {
-    const task: ITask = {
-      ...newTask,
-      id: tasks.length + 1,
-      createdAt: new Date().toISOString(),
-    }
-    // setTasks([...tasks, task])
-    setIsAddNewModalOpen(false)
-  }
+    return () => clearTimeout(timeout);
+  }, [])
 
   const openTaskModal = (task: ITask) => {
     setSelectedTask(task)
@@ -126,36 +72,35 @@ export default function BoardPage() {
   }
 
   const openEditModal = (task: ITask) => {
-    setEditingTask({ ...task })
+    console.log(task)
+    setEditingTask(task)
   }
 
   const closeEditModal = () => {
     setEditingTask(null)
   }
 
-  const handleEditTask = (updatedTask: ITask) => {
+  const handleEditTask = () => {
     // setTasks(tasks.map(task => task.id === updatedTask.id ? updatedTask : task))
     closeEditModal()
   }
 
-  const handleDragEnd = (result: DropResult, provided: ResponderProvided) => {
-    // const { destination, source, draggableId } = result;
-
-    // if (!destination) {
-    //   return;
-    // }
-
-    // if (source.droppableId === destination.droppableId) {
-    //   const tasks = reorder(
-    //     tasks,
-    //     result.source.index,
-    //     result.destination.index
-    //   );
-
-    //   setTasks(tasks);
-    // }
+  const handleDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+  
+    if (!destination) {
+      return;
+    }
+  
+    if (destination.droppableId === source.droppableId && destination.index === source.index) {
+      return;
+    }
+  
+    // Perform the reordering logic here
+  
+    console.log(`From column: ${source.droppableId}, to column: ${destination.droppableId}, draggableId: ${draggableId}`);
   };
-
+  
   return (
     <div className="container mx-auto p-4">
       <header className="flex justify-between items-center mb-6">
@@ -164,7 +109,7 @@ export default function BoardPage() {
           <PlusIcon className="mr-2 h-4 w-4" /> Add New
         </Button>
       </header>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between gap-2 items-center mb-6">
         <Input
           type="text"
           placeholder="Search..."
@@ -182,21 +127,21 @@ export default function BoardPage() {
           </SelectContent>
         </Select>
       </div>
-      <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {columns.map((column) => (
-          <Column
-            key={column.id}
-            data={column}
-            onTaskClick={openTaskModal}
-            onEditClick={openEditModal}
-          />
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full h-full">
+        <DragDropContext onDragEnd={handleDragEnd}>
+          {columns.map((column) => (
+            <Column
+              key={column.id}
+              data={column}
+              onTaskClick={openTaskModal}
+              onEditClick={openEditModal}
+            />
+          ))}
+        </DragDropContext>
       </div>
-      </DragDropContext>
       <TaskModal isOpen={!!selectedTask} onClose={closeTaskModal} task={selectedTask} />
       <EditTaskModal isOpen={!!editingTask} onClose={closeEditModal} task={editingTask} onSave={handleEditTask} />
-      <AddNewTaskModal isOpen={isAddNewModalOpen} onClose={() => setIsAddNewModalOpen(false)} onAdd={addNewTask} />
+      <AddNewTaskModal isOpen={isAddNewModalOpen} onClose={() => setIsAddNewModalOpen(false)} />
     </div>
   );
 }

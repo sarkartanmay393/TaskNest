@@ -53,6 +53,7 @@ export interface IGlobalStore {
   // data fetching
   setIsLoading: Action<IGlobalStore, boolean>;
   setError: Action<IGlobalStore, string>;
+  setTasksByColumn: Action<IGlobalStore, { tasks: ITask[], columnId: number }>;
   setTasks: Action<IGlobalStore, ITask[]>;
   setSortBy: Action<IGlobalStore, string>;
   setColumns: Action<IGlobalStore, IColumn[]>;

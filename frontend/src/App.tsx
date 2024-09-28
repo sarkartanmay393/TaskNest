@@ -9,7 +9,7 @@ import { Toaster } from './components/ui/toaster';
 
 function App() {
   return (
-    <div className="overflow-hidden w-[100vw] h-[100vh] flex flex-col justify-center p-4 bg-gray-100">
+    <div className="overflow-x-hidden overflow-y-auto w-[100vw] h-[100vh] flex flex-col p-4 bg-gray-100">
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<ProtectedRoute><HomePage/></ProtectedRoute>} />

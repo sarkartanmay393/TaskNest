@@ -2,16 +2,16 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
-import { Provider } from 'react-redux'
 import globalStore from './state/globalStore'
-import { createStore } from 'easy-peasy'
+import { createStore, StoreProvider } from 'easy-peasy'
+import { IGlobalStore } from './interfaces'
 
-const store = createStore(globalStore);
+const store = createStore<IGlobalStore>(globalStore);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Provider store={store}>
+    <StoreProvider store={store}>
       <App />
-    </Provider>
+    </StoreProvider>
   </StrictMode>,
 )

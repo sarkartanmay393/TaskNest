@@ -6,8 +6,11 @@ import express from "express";
 import cookie from "cookie-parser";
 import rateLimit from 'express-rate-limit';
 
+import { createTask, deleteTask, updateTask, getAllTasks } from "./controllers/taskController";
 import connectDatabase from "./utils/connectDatabase";
 import { createUser, loginUser, logOut } from "./controllers/authController";
+import { catchGlobalErrors } from "./middlewares/catchGlobalErrors";
+import { catchAllMiddleware } from "./middlewares/catchAllMiddleware";
 import authMiddleware from "./middlewares/authMiddleware";
 
 const PORT = process.env.PORT || 8080;
@@ -24,7 +27,7 @@ const limiter = rateLimit({
 // Middlewares
 app.use(
   cors.default({
-    origin: ["http://localhost:3000", "https://tsmk-voosho.vercel.app"],
+    origin: ["http://localhost:5173", "https://tsmk-voosho.vercel.app"],
     credentials: true,
   })
 );
@@ -41,6 +44,17 @@ app.post("/v1/api/signup", createUser);
 app.post("/v1/api/login", loginUser);
 
 app.get("/v1/api/logout", authMiddleware, logOut);
+
+// Task Management
+app.get("/v1/api/task/get", authMiddleware, getAllTasks);
+app.post("/v1/api/task/create", authMiddleware, createTask);
+app.put("/v1/api/task/update/:id", authMiddleware, updateTask);
+app.delete("/v1/api/task/delete/:id", authMiddleware, deleteTask);
+app.post("/v1/api/task/bulkUpdate", authMiddleware, bulkUpdateTasks);
+
+// Error handling
+// app.use(catchAllMiddleware);
+// app.use(catchGlobalErrors);
 
 connectDatabase(() => {
   app.listen(PORT, () => {

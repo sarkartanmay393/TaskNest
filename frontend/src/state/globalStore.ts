@@ -1,5 +1,5 @@
 import { IGlobalStore, ITask, TASK_STATUS } from "../interfaces";
-import { action, thunk } from "easy-peasy";
+import { action } from "easy-peasy";
 
 const globalStore: IGlobalStore = {
   isLoading: true,
@@ -14,16 +14,52 @@ const globalStore: IGlobalStore = {
 
   setTasks: action((state, payload: ITask[]) => {
     state.tasks = payload;
+    const c1Tasks = payload.filter((task) => task.columnId === 1);
+    const c2Tasks = payload.filter((task) => task.columnId === 2);
+    const c3Tasks = payload.filter((task) => task.columnId === 3);
+    state.columns = [
+      {
+        id: 1,
+        title: "TODO",
+        tasks: c1Tasks,
+      },
+      {
+        id: 2,
+        title: "IN PROGRESS",
+        tasks: c2Tasks,
+      },
+      {
+        id: 3,
+        title: "COMPLETED",
+        tasks: c3Tasks,
+      },
+    ];
   }),
 
-  addTask: action((state, payload: ITask) => {
-    console.log(payload, 'payload');
-    state.tasks = [...state.tasks, payload];
+  setTasksByColumn: action((state, payload: { tasks: ITask[], columnId: number }) => {
+    const { tasks, columnId } = payload;
+    state.tasks = state.tasks.concat(tasks);
+    state.columns = state.columns.map((column) => {
+      if (column.id === columnId) {
+        return {
+          ...column,
+          tasks: column.tasks.concat(tasks),
+        };
+      }
+      return column;
+    });
   }),
 
   removeTask: action((state, playload: ITask) => {
     const filteredTasks = state.tasks.filter((task) => task.id !== playload.id);
-    state.tasks = filteredTasks;
+    const filteredColumns = state.columns.map((column) => {
+      return {
+        ...column,
+        tasks: column.tasks.filter((task) => task.id !== playload.id),
+      };
+    });
+    state.tasks = filteredTasks
+    state.columns = filteredColumns
   }),
 
   changeStatus: action((state, payload: { status: TASK_STATUS; id: number }) => {
@@ -35,6 +71,34 @@ const globalStore: IGlobalStore = {
         };
       }
       return task;
+    });
+
+    let columnId: number;
+    if (payload.status === TASK_STATUS.TODO) {
+      columnId = 1;
+    } else if (payload.status === TASK_STATUS.INPROGRESS) {
+      columnId = 2;
+    } else if (payload.status === TASK_STATUS.COMPLETED) {
+      columnId = 3;
+    }
+
+
+    state.columns = state.columns.map((column) => {
+      if (column.id === columnId) {
+        return {
+          ...column,
+          tasks: column.tasks.map((task) => {
+            if (task.id === payload.id) {
+              return {
+                ...task,
+                status: payload.status,
+              };
+            }
+            return task;
+          }),
+        };
+      }
+      return column;
     });
   }),
 
@@ -84,17 +148,17 @@ const globalStore: IGlobalStore = {
 export default globalStore;
 
 // Mock function to simulate API call
-const fetchTasksFromApi = async (): Promise<ITask[]> => {
-  return [
-    {
-      id: 1, title: "Task 1", description: "Description 1", status: TASK_STATUS.TODO, columnId: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-      userId: 0,
-      user: undefined
-    },
-    {
-      id: 2, title: "Task 2", description: "Description 2", status: TASK_STATUS.TODO, columnId: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-      userId: 0,
-      user: undefined
-    }
-  ];
-};
+// const fetchTasksFromApi = async (): Promise<ITask[]> => {
+//   return [
+//     {
+//       id: 1, title: "Task 1", description: "Description 1", status: TASK_STATUS.TODO, columnId: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+//       userId: 0,
+//       user: undefined
+//     },
+//     {
+//       id: 2, title: "Task 2", description: "Description 2", status: TASK_STATUS.TODO, columnId: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+//       userId: 0,
+//       user: undefined
+//     }
+//   ];
+// };
