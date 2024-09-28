@@ -49,7 +49,10 @@ export interface IGlobalStore {
   tasks: ITask[];
   columns: IColumn[];
   sortBy: string;
+  lastSuccessfulSyncAt: string;
+  lastSyncStatus: string;
 
+  setSyncInfo: Action<IGlobalStore, { lastSuccessfulSyncAt: string, status: string }>;
   // data fetching
   setIsLoading: Action<IGlobalStore, boolean>;
   setError: Action<IGlobalStore, string>;
@@ -59,7 +62,7 @@ export interface IGlobalStore {
   setColumns: Action<IGlobalStore, IColumn[]>;
 
   // Task management
-  addTask: Action<IGlobalStore, ITask>;
+  // addTask: Action<IGlobalStore, ITask>;
   removeTask: Action<IGlobalStore, ITask>;
   updateTask: Action<IGlobalStore, ITask>;
   changeStatus: Action<IGlobalStore, { status: TASK_STATUS; id: number }>;

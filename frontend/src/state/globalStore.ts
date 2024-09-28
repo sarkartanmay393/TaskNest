@@ -7,6 +7,13 @@ const globalStore: IGlobalStore = {
   tasks: [],
   columns: [],
   sortBy: "updatedAt",
+  lastSuccessfulSyncAt: "",
+  lastSyncStatus: "success",
+
+  setSyncInfo: action((state, payload) => {
+    state.lastSuccessfulSyncAt = payload.lastSuccessfulSyncAt;
+    state.lastSyncStatus = payload.status;
+  }),
 
   setIsLoading: action((state, payload) => {
     state.isLoading = payload;
@@ -36,7 +43,7 @@ const globalStore: IGlobalStore = {
     ];
   }),
 
-  setTasksByColumn: action((state, payload: { tasks: ITask[], columnId: number }) => {
+  setTasksByColumn: action((state, payload: { tasks: ITask[]; columnId: number; }) => {
     const { tasks, columnId } = payload;
     state.tasks = state.tasks.concat(tasks);
     state.columns = state.columns.map((column) => {
@@ -58,11 +65,11 @@ const globalStore: IGlobalStore = {
         tasks: column.tasks.filter((task) => task.id !== playload.id),
       };
     });
-    state.tasks = filteredTasks
-    state.columns = filteredColumns
+    state.tasks = filteredTasks;
+    state.columns = filteredColumns;
   }),
 
-  changeStatus: action((state, payload: { status: TASK_STATUS; id: number }) => {
+  changeStatus: action((state, payload: { status: TASK_STATUS; id: number; }) => {
     state.tasks = state.tasks.map((task) => {
       if (task.id === payload.id) {
         return {
@@ -118,31 +125,10 @@ const globalStore: IGlobalStore = {
   setSortBy: action((state, payload) => {
     state.sortBy = payload;
   }),
-  
+
   setColumns: action((state, payload) => {
     state.columns = payload;
-  }),
-  
-  // initializeStore: thunk(async (actions) => {
-  //   actions.setIsLoading(true);
-  //   try {
-  //     const tasks = await fetchTasksFromApi();
-  //     actions.setTasks(tasks);
-  //   } catch (error) {
-  //     actions.setError(error.message);
-  //   } finally {
-  //     actions.setIsLoading(false);
-  //   }
-  // }),
-
-  // cleanupStore: action((state) => {
-  //   console.log("Cleaning up store");
-    // state.isLoading = false;
-    // state.error = "";
-    // state.tasks = [];
-    // state.columns = [];
-    // state.sortBy = "updatedAt";
-  // }),
+  })
 };
 
 export default globalStore;

@@ -175,37 +175,44 @@ export const bulkUpdateTasks = async (req: ReqType, res: ResType) => {
   const { tasks = [] } = req.body as unknown as { tasks: any[] };
 
   try {
-    const createdTasks: any[] = [];
-    const updatedTasks: any[] = [];
+    const createTasks: any[] = [];
+    const updateTasks: any[] = [];
 
-    // Process each task
     for (const task of tasks) {
       if (task.id) {
-        // Update existing task
-        const updatedTask = await prisma.task.update({
-          where: { id: task.id },
-          data: {
-            status: task.status,
-          },
+        updateTasks.push({
+          id: Number(task.id),
+          title: task.title,
+          description: task.description,
+          columnId: Number(task.columnId),
+          createdAt: new Date(task.createdAt),
+          updatedAt: new Date(task.updatedAt),
+          userId: Number(userid),
         });
-        updatedTasks.push(updatedTask);
       } else {
-        // Create new task
-        const createdTask = await prisma.task.create({
-          data: {
+        createTasks.push({
+            title: task.title,
+            description: task.description,
+            columnId: Number(task.columnId),
+            createdAt: new Date(task.createdAt),
+            updatedAt: new Date(task.updatedAt),
             userId: Number(userid),
-            status: task.status,
-            title: task.title || "New Task", 
-          },
         });
-        createdTasks.push(createdTask);
       }
     }
 
-    return res.json({ createdTasks, updatedTasks });
+    const updatedTasks = await prisma.task.updateMany({
+      where: { id: { in: updateTasks.map((task) => task.id) } },
+      data: updateTask,
+    });
+    
+    const createdTasks = await prisma.task.createManyAndReturn({
+      data: createTasks,
+    });
+    return res.json({ createdTasks, updatedTasks, lastSuccessfulSyncAt: new Date().toISOString(), status: "success" });
   } catch (error) {
     console.log(error);
-    return res.json({ error: "Failed to update tasks", verbose: JSON.stringify(error) });
+    return res.json({ error: "Failed to update tasks", verbose: JSON.stringify(error), status: "failed", lastSuccessfulSyncAt: new Date("1963-01-01").toISOString() });
   }
 };
 

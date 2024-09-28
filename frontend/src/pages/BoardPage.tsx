@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import { useStoreActions } from "../state/typedHooks";
+import { useStoreActions, useStoreState } from "../state/typedHooks";
 import { IColumn, ITask } from "../interfaces";
-import { getTasksApi } from "../lib/apis";
+import { getTasksApi, syncTasksApi } from "../lib/apis";
 
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
@@ -31,7 +31,7 @@ const columns: IColumn[] = [
 ];
 
 export default function BoardPage() {
-  // useStoreState((state) => state);
+  const { tasks } = useStoreState((state) => state);
   const { setTasks, setIsLoading } =
     useStoreActions((action) => action);
 
@@ -56,8 +56,10 @@ export default function BoardPage() {
   }, []);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      
+    const timeout = setTimeout(async() => {
+     const { status, lastSyncAt, createdTasks } = await syncTasksApi({ tasks });
+     console.log({ status, lastSyncAt, createdTasks });
+     setTasks(tasks.filter((task) => !createdTasks.some((createdTask) => createdTask.id === task.id)).concat(createdTasks));
     }, 5000);
 
     return () => clearTimeout(timeout);

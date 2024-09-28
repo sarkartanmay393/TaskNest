@@ -6,7 +6,7 @@ import express from "express";
 import cookie from "cookie-parser";
 import rateLimit from 'express-rate-limit';
 
-import { createTask, deleteTask, updateTask, getAllTasks } from "./controllers/taskController";
+import { createTask, deleteTask, updateTask, getAllTasks, bulkUpdateTasks } from "./controllers/taskController";
 import connectDatabase from "./utils/connectDatabase";
 import { createUser, loginUser, logOut } from "./controllers/authController";
 import { catchGlobalErrors } from "./middlewares/catchGlobalErrors";

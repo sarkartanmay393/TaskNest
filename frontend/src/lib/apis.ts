@@ -1,3 +1,4 @@
+import { ITask } from "~/interfaces";
 import { headers } from "../worker/WebWorker";
 import { baseUrl } from "./network";
 import { LoginPayload, SignUpPayload } from "./types";
@@ -113,5 +114,27 @@ export const getTasksApi = async ({}: { taskId?: string | number, pagination?: {
     return data;
   } catch (err) {
     console.error(err);
+  }
+};
+
+export const syncTasksApi = async (payload: {
+  tasks: ITask[];
+}) => {
+  try {
+    const resp = await fetch(baseUrl + "/api/task/bulkUpdate", {
+      method: "POST",
+      headers: headers,
+      credentials: "include",
+      body: JSON.stringify(payload),
+    });
+    if (resp.status !== 200) {
+      throw new Error("Failed to sync tasks");
+    }
+
+    const data = await resp.json();
+    return data as { status: string, lastSyncAt: any, createdTasks: ITask[] };
+  } catch (err) {
+    console.error(err);
+    throw new Error("Failed to sync tasks");
   }
 };
