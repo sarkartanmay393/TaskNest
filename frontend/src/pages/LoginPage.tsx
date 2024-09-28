@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { toast } from "~/hooks/use-toast";
 import { loginApi } from "~/lib/apis";
 
 type FormData = {
@@ -24,7 +25,12 @@ export default function LoginPage() {
       sessionStorage.setItem("accessToken", token);
       sessionStorage.setItem("user", JSON.stringify(user));
       navigate("/");
-    } catch (error: unknown) {
+    } catch (error: any) {
+      console.log(error);
+      toast({
+        title: "Login failed",
+        description: error.message,
+      })
     } finally {
       setIsSubmitting(false);
     }

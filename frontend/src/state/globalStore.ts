@@ -1,5 +1,5 @@
 import { IGlobalStore, ITask, TASK_STATUS } from "../interfaces";
-import { action } from "easy-peasy";
+import { action, thunk } from "easy-peasy";
 
 const globalStore: IGlobalStore = {
   isLoading: true,
@@ -58,6 +58,43 @@ const globalStore: IGlobalStore = {
   setColumns: action((state, payload) => {
     state.columns = payload;
   }),
+  
+  // initializeStore: thunk(async (actions) => {
+  //   actions.setIsLoading(true);
+  //   try {
+  //     const tasks = await fetchTasksFromApi();
+  //     actions.setTasks(tasks);
+  //   } catch (error) {
+  //     actions.setError(error.message);
+  //   } finally {
+  //     actions.setIsLoading(false);
+  //   }
+  // }),
+
+  // cleanupStore: action((state) => {
+  //   console.log("Cleaning up store");
+    // state.isLoading = false;
+    // state.error = "";
+    // state.tasks = [];
+    // state.columns = [];
+    // state.sortBy = "updatedAt";
+  // }),
 };
 
 export default globalStore;
+
+// Mock function to simulate API call
+const fetchTasksFromApi = async (): Promise<ITask[]> => {
+  return [
+    {
+      id: 1, title: "Task 1", description: "Description 1", status: TASK_STATUS.TODO, columnId: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      userId: 0,
+      user: undefined
+    },
+    {
+      id: 2, title: "Task 2", description: "Description 2", status: TASK_STATUS.TODO, columnId: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      userId: 0,
+      user: undefined
+    }
+  ];
+};

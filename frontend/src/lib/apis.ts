@@ -23,18 +23,18 @@ export const signUpApi = async (payload: SignUpPayload) => {
 
 export const loginApi = async (payload: LoginPayload) => {
   try {
-    const { user, token, error } = await fetch(baseUrl + "/api/login", {
+    const resp = await fetch(baseUrl + "/api/login", {
       method: "POST",
       headers: headers,
       credentials: "include",
       body: JSON.stringify(payload),
     }) as any;
-    if (error) {
-      throw new Error(error);
+    if (!resp.ok) {
+      throw new Error("Failed to login");
     }
-    return { user, token };
+    const data = await resp.json();
+    return { user: data.user, token: data.token };
   } catch (err: any) {
-    console.error(err);
     throw new Error(err);
   }
 };
@@ -91,7 +91,7 @@ export const deleteTaskApi = async (taskId: any) => {
   }
 };
 
-export const getTasksApi = async ({  }: { taskId?: string | number, pagination?: { start: number, count: number }, search?: string, sortBy?: string }) => {
+export const getTasksApi = async ({}: { taskId?: string | number, pagination?: { start: number, count: number }, search?: string, sortBy?: string }) => {
   try {
     const resp = await fetch(baseUrl + "/api/task/get", {
       method: "GET",
@@ -109,7 +109,8 @@ export const getTasksApi = async ({  }: { taskId?: string | number, pagination?:
     }
 
     const data = await resp.json();
-    return { tasks: data.tasks };
+    console.log(data);
+    return data;
   } catch (err) {
     console.error(err);
   }

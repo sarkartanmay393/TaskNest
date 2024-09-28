@@ -1,41 +1,74 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
-import Board from "../components/Board";
 import { useStoreActions, useStoreState } from "../state/typedHooks";
 import { ITask, TASK_STATUS } from "../interfaces";
-import Loading from "../components/Loading";
-import { getTasksApi, logOutApi } from "../lib/apis";
+import { getTasksApi } from "../lib/apis";
 
 
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
-import { Textarea } from "~/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "~/components/ui/dialog"
 import { PlusIcon } from 'lucide-react'
+import Column from "~/components/Column";
+import { AddNewTaskModal, EditTaskModal, TaskModal } from "~/components/Modals";
+import { DragDropContext, DropResult, ResponderProvided } from "react-beautiful-dnd";
 
-// Types
-type Task = {
-  id: string
-  title: string
-  description: string
-  status: 'TODO' | 'IN PROGRESS' | 'DONE'
-  createdAt: string
-}
 
 // Mock data
-const initialTasks: Task[] = [
-  { id: '1', title: 'Task 1', description: 'Description 1', status: 'TODO', createdAt: '2023/05/01 09:00:00' },
-  { id: '2', title: 'Task 2', description: 'Description 2', status: 'TODO', createdAt: '2023/05/02 10:30:00' },
-  { id: '3', title: 'Task 3', description: 'Description 3', status: 'TODO', createdAt: '2023/05/03 11:45:00' },
-  { id: '4', title: 'Task 4', description: 'Description 4', status: 'IN PROGRESS', createdAt: '2023/05/04 14:15:00' },
-  { id: '5', title: 'Task 5', description: 'Description 5', status: 'IN PROGRESS', createdAt: '2023/05/05 16:30:00' },
-  { id: '6', title: 'Task 6', description: 'Description 6', status: 'DONE', createdAt: '2023/05/06 18:00:00' },
+const initialTasks: ITask[] = [
+  {
+    id: 1,
+    title: 'Task 1',
+    description: 'Description 1', status: TASK_STATUS.TODO, createdAt: '2023/05/01 09:00:00',
+    columnId: 1,
+    column: undefined,
+    userId: 0,
+    user: undefined,
+    updatedAt: ""
+  },
+  {
+    id: 2, title: 'Task 2', description: 'Description 2', status: TASK_STATUS.TODO, createdAt: '2023/05/02 10:30:00',
+    columnId: 1,
+    column: undefined,
+    userId: 0,
+    user: undefined,
+    updatedAt: ""
+  },
+  {
+    id: 3, title: 'Task 3', description: 'Description 3', status: TASK_STATUS.TODO, createdAt: '2023/05/03 11:45:00',
+    columnId: 1,
+    column: undefined,
+    userId: 0,
+    user: undefined,
+    updatedAt: ""
+  },
+  {
+    id: 4, title: 'Task 4', description: 'Description 4', status: TASK_STATUS.INPROGRESS, createdAt: '2023/05/04 14:15:00',
+    columnId: 2,
+    column: undefined,
+    userId: 0,
+    user: undefined,
+    updatedAt: ""
+  },
+  {
+    id: 5, title: 'Task 5', description: 'Description 5', status: TASK_STATUS.INPROGRESS, createdAt: '2023/05/05 16:30:00',
+    columnId: 2,
+    column: undefined,
+    userId: 0,
+    user: undefined,
+    updatedAt: ""
+  },
+  {
+    id: 6, title: 'Task 6', description: 'Description 6', status: TASK_STATUS.COMPLETED, createdAt: '2023/05/06 18:00:00',
+    columnId: 3,
+    column: undefined,
+    userId: 0,
+    user: undefined,
+    updatedAt: ""
+  },
 ]
 
 export default function BoardPage() {
-  const navigateTo = useNavigate();
   const { isLoading, tasks, columns } = useStoreState((state) => state);
   const { addTask, setTasks, setIsLoading, setColumns } =
     useStoreActions((action) => action);
@@ -45,8 +78,7 @@ export default function BoardPage() {
       try {
         setIsLoading(true);
         const { tasks, columns } = await getTasksApi({}) as any;
-
-        setTasks(tasks);
+        setTasks(initialTasks);
         setColumns(columns);
       } catch (err) {
         console.log(err);
@@ -56,35 +88,10 @@ export default function BoardPage() {
     })();
   }, []);
 
-  const handleNewTask = async () => {
-    let defaultTask: ITask = {
-      id: tasks.length + 1,
-      title: "",
-      description: "",
-      status: TASK_STATUS.TODO,
-      columnId: 1,
-      userId: JSON.parse(sessionStorage.getItem("user") ?? '').id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      column: columns.find((column) => column.id === 1)!,
-      user: undefined
-    };
-
-    addTask(defaultTask);
-  };
-
-  const handleLogout = () => {
-    logOutApi(navigateTo);
-  };
-
-  const handleGoBack = () => {
-    window.history.back();
-  }
-
   const [searchTerm, setSearchTerm] = useState('')
   const [sortOrder, setSortOrder] = useState('recent')
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [selectedTask, setSelectedTask] = useState<ITask | null>(null)
+  const [editingTask, setEditingTask] = useState<ITask | null>(null)
   const [isAddNewModalOpen, setIsAddNewModalOpen] = useState(false)
 
   const filteredTasks = tasks.filter(task =>
@@ -100,17 +107,17 @@ export default function BoardPage() {
     }
   })
 
-  const addNewTask = (newTask: Omit<Task, 'id' | 'createdAt'>) => {
-    const task: Task = {
+  const addNewTask = (newTask: Omit<ITask, 'id' | 'createdAt'>) => {
+    const task: ITask = {
       ...newTask,
-      id: Date.now().toString(),
+      id: tasks.length + 1,
       createdAt: new Date().toISOString(),
     }
     // setTasks([...tasks, task])
     setIsAddNewModalOpen(false)
   }
 
-  const openTaskModal = (task: Task) => {
+  const openTaskModal = (task: ITask) => {
     setSelectedTask(task)
   }
 
@@ -118,7 +125,7 @@ export default function BoardPage() {
     setSelectedTask(null)
   }
 
-  const openEditModal = (task: Task) => {
+  const openEditModal = (task: ITask) => {
     setEditingTask({ ...task })
   }
 
@@ -126,10 +133,28 @@ export default function BoardPage() {
     setEditingTask(null)
   }
 
-  const handleEditTask = (updatedTask: Task) => {
+  const handleEditTask = (updatedTask: ITask) => {
     // setTasks(tasks.map(task => task.id === updatedTask.id ? updatedTask : task))
     closeEditModal()
   }
+
+  const handleDragEnd = (result: DropResult, provided: ResponderProvided) => {
+    // const { destination, source, draggableId } = result;
+
+    // if (!destination) {
+    //   return;
+    // }
+
+    // if (source.droppableId === destination.droppableId) {
+    //   const tasks = reorder(
+    //     tasks,
+    //     result.source.index,
+    //     result.destination.index
+    //   );
+
+    //   setTasks(tasks);
+    // }
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -157,11 +182,18 @@ export default function BoardPage() {
           </SelectContent>
         </Select>
       </div>
+      <DragDropContext onDragEnd={handleDragEnd}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <TaskColumn title="TODO" tasks={sortedTasks.filter(task => task.status === 'TODO')} onTaskClick={openTaskModal} onEditClick={openEditModal} />
-        <TaskColumn title="IN PROGRESS" tasks={sortedTasks.filter(task => task.status === 'IN PROGRESS')} onTaskClick={openTaskModal} onEditClick={openEditModal} />
-        <TaskColumn title="DONE" tasks={sortedTasks.filter(task => task.status === 'DONE')} onTaskClick={openTaskModal} onEditClick={openEditModal} />
+        {columns.map((column) => (
+          <Column
+            key={column.id}
+            data={column}
+            onTaskClick={openTaskModal}
+            onEditClick={openEditModal}
+          />
+        ))}
       </div>
+      </DragDropContext>
       <TaskModal isOpen={!!selectedTask} onClose={closeTaskModal} task={selectedTask} />
       <EditTaskModal isOpen={!!editingTask} onClose={closeEditModal} task={editingTask} onSave={handleEditTask} />
       <AddNewTaskModal isOpen={isAddNewModalOpen} onClose={() => setIsAddNewModalOpen(false)} onAdd={addNewTask} />

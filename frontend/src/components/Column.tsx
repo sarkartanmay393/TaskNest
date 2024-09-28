@@ -1,23 +1,38 @@
 import { Droppable } from "react-beautiful-dnd";
 
-import TaskList from "./TaskList";
 import { IColumn } from "../interfaces";
+import TaskCard from "./TaskCard";
+import { useStoreState } from "~/state/typedHooks";
 
-export default function Column({ data }: { data: IColumn }) {
+export default function Column({
+  data,
+  onTaskClick,
+  onEditClick
+}: {
+  data: IColumn,
+  onTaskClick: any,
+  onEditClick: any
+}
+) {
+  const { tasks } = useStoreState((state) => state);
+
   return (
-    <div className="h-[60vh] border-[2px] bg-blue-600 border-solid border-black rounded-[6px] overflow-auto">
-      <h4 className="bg-pink-100 p-2 font-[500] text-[1.2rem] text-center ">{data.title}</h4>
-      <div className="overflow-auto">
-        <Droppable droppableId={data.id.toString()}>
-          {provided => (
-            <TaskList
-              tasks={data.tasks}
-              columnId={data.id}
-              provided={provided}
-            />
-          )}
-        </Droppable>
-      </div>
+    <div className="bg-gray-100 p-4 rounded-lg">
+      <h2 className="text-lg font-semibold mb-4">{data.title}</h2>
+      <Droppable droppableId={data.id.toString()}>
+        {(provided) => (
+          <div className="space-y-4" {...provided.droppableProps} ref={provided.innerRef}>
+            {tasks.map(task => (
+              <TaskCard
+                key={task.id}
+                data={task}
+                onClick={() => onTaskClick(task)}
+                onEditClick={() => onEditClick(task)}
+              />
+            ))}
+          </div>
+        )}
+      </Droppable>
     </div>
   );
 }
