@@ -14,7 +14,7 @@ import {
   bulkUpdateTasks
 } from "./controllers/taskController";
 import connectDatabase from "./utils/connectDatabase";
-import { createUser, loginUser, logOut } from "./controllers/authController";
+import { createUser, loginUser, logOut, storeGoogleId } from "./controllers/authController";
 // import { catchGlobalErrors } from "./middlewares/catchGlobalErrors";
 // import { catchAllMiddleware } from "./middlewares/catchAllMiddleware";
 import authMiddleware from "./middlewares/authMiddleware";
@@ -48,6 +48,7 @@ app.get('/', (_, res) => {
 // Authentication
 app.post("/v1/api/signup", createUser);
 app.post("/v1/api/login", loginUser);
+app.post("/v1/api/storeGoogleId", storeGoogleId);
 app.get("/v1/api/logout", authMiddleware, logOut);
 
 // Task Management

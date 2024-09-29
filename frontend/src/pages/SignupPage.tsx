@@ -5,11 +5,11 @@ import { useForm } from 'react-hook-form'
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { signUpApi } from "~/lib/apis";
+import { signUpApi, storeGoogleIdApi } from "~/lib/apis";
 import { toast } from "~/hooks/use-toast";
 
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth } from "../firebase.config"; // Import your Firebase config
+import { auth } from "../firebase.config";
 
 type FormData = {
   firstName: string
@@ -61,12 +61,33 @@ export default function SignupPage() {
         email: user.email,
         name: user.displayName,
       }));
-      toast({
-        title: "Signup successful",
-        description: "You are now signed up",
-        duration: 3000,
-      })
-      navigate('/')
+      const data = await storeGoogleIdApi({ googleId: user.uid });
+      if (data) {
+        sessionStorage.setItem("userConfig", JSON.stringify(data.userConfig));
+        toast({
+          title: "Signup successful",
+          description: "You are now signed up",
+          duration: 3000,
+        })
+        navigate('/');
+      } else {
+        console.log("Failed to store googleId");
+        const intervalId = setInterval(async() => {
+          const data = await storeGoogleIdApi({ googleId: user.uid });
+          if (data) {
+            sessionStorage.setItem("userConfig", JSON.stringify(data.userConfig));
+            toast({
+              title: "Signup successful",
+              description: "You are now signed up",
+              duration: 3000,
+            })
+            clearInterval(intervalId);
+            navigate('/');
+          } else {
+            console.log("Failed to store googleId");
+          }
+        }, 3000);
+      }
     } catch (error: unknown) {
       toast({
         title: "Signup failed",

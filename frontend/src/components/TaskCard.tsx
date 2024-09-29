@@ -33,7 +33,7 @@ export default function TaskCard({ data, onClick, onEditClick, index }: TaskProp
           <h3 className="font-semibold">{data.title}</h3>
           <p className="text-sm text-gray-600">{data.description.length ? data.description : "No description"}</p>
           <div className="flex justify-end space-x-2 mt-2">
-            <p className="text-xs text-gray-400 mt-2 flex-1">Updated: {new Date(data.updatedAt).toLocaleString('en-US', { timeStyle: 'short' })}</p>
+            <p className="hidden sm:flex text-xs text-gray-400 mt-2 flex-1">Updated: {new Date(data.updatedAt).toLocaleString('en-US', { timeStyle: 'short' })}</p>
             <Button variant="outline" size="sm" onClick={onEditClick}>Edit</Button>
             <Button variant="outline" size="sm" onClick={handleDelete}>Delete</Button>
             <Button variant="outline" size="sm" onClick={onClick}>View Details</Button>

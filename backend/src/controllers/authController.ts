@@ -5,6 +5,46 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+const storeGoogleId = async (req: ReqType, res: ResType) => {
+  const { googleId } = req.body;
+
+  try {
+    const userConfig = await prisma.userConfig.findUnique({
+      where: {
+        googleId,
+      }
+    })
+
+    if (userConfig) {
+      return res.status(200).json({ error: "User already exists", userConfig: userConfig  });
+    }
+
+    const decidedUserId = await prisma.user.count();
+    console.log({ decidedUserId: decidedUserId+2000 });
+
+    const newUser = await prisma.user.create({
+      data: {
+        name: 'TSX tsmk' + decidedUserId,
+        email: googleId + "@tsmk.googleauth",
+        password: '',
+        id: decidedUserId+2000,
+      }
+    });
+
+    const userConfigData = await prisma.userConfig.create({
+      data: {
+        googleId,
+        userId: decidedUserId+2000,
+      },
+    });
+
+    return res.json({ userConfig: userConfigData, user: newUser });
+  } catch (error) {
+    console.error(error);
+    return res.status(401).json({ error: "Failed to store googleId", verbose: JSON.stringify(error) });
+  }
+};
+
 const logOut = async (req: ReqType, res: ResType) => {
   const { userid } = req.headers;
   if (!userid) {
@@ -107,4 +147,4 @@ const loginUser = async (req: ReqType, res: ResType) => {
   }
 };
 
-export { createUser, loginUser, logOut };
+export { createUser, loginUser, logOut, storeGoogleId };

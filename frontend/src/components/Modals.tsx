@@ -13,7 +13,7 @@ export function TaskModal({ isOpen, onClose, task }: { isOpen: boolean, onClose:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="rounded-lg max-w-[320px] sm:max-w-[425px] lg:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Task Details</DialogTitle>
         </DialogHeader>
@@ -29,7 +29,7 @@ export function TaskModal({ isOpen, onClose, task }: { isOpen: boolean, onClose:
         </div>
         <DialogFooter>
           <div className="w-full flex justify-between items-end">
-            <p className="text-xs text-gray-500"><span className="font-medium">Updated at:</span> {task.updatedAt.split('T').join(' ')}</p>
+            <p className="text-xs text-gray-500">Updated at: {new Date(task.updatedAt).toLocaleString('en-US', { timeStyle: 'short', dateStyle: 'short' })}</p>
             <Button onClick={onClose}>Close</Button>
           </div>
         </DialogFooter>
@@ -173,10 +173,9 @@ export function AddNewTaskModal({ isOpen, onClose }: { isOpen: boolean, onClose:
     }
   }
 
-  window.onkeydown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey && (e?.currentTarget as any)?.name === 'new-title') {
-      e.preventDefault();
-      document.getElementById('new-description')!.focus();
+  window.onkeyup = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      handleAdd();
     }
   }
 
@@ -237,7 +236,7 @@ export function AddNewTaskModal({ isOpen, onClose }: { isOpen: boolean, onClose:
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleAdd}>Add ITask</Button>
+          <Button id="add-new-task" onClick={handleAdd}>Add ITask</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

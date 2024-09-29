@@ -8,7 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { toast } from "~/hooks/use-toast";
-import { loginApi } from "~/lib/apis";
+import { loginApi, storeGoogleIdApi } from "~/lib/apis";
 
 type FormData = {
   email: string
@@ -52,12 +52,27 @@ export default function LoginPage() {
       const user = result.user;
       console.log("User signed in:", user);
       const token = await user.getIdToken();
-      sessionStorage.setItem("accessToken", token);
-      sessionStorage.setItem("user", JSON.stringify({
-        id: user.uid,
-        email: user.email,
-        name: user.displayName,
-      }));
+      const data = await storeGoogleIdApi({ googleId: user.uid });
+      if (data) {
+        sessionStorage.setItem("accessToken", token);
+        sessionStorage.setItem("user", JSON.stringify({
+          id: user.uid,
+          email: user.email,
+          name: user.displayName,
+        }));
+        sessionStorage.setItem("userConfig", JSON.stringify(data.userConfig));
+        toast({
+          title: "Login successful",
+          description: "You are now Logged in",
+          duration: 3000,
+        })
+        navigate('/');
+      } else {
+        console.log("Failed to store googleId");
+        sessionStorage.clear();
+        localStorage.clear();
+        throw new Error("Failed to store googleId");
+      }
       toast({
         title: "Login successful",
         description: "You are now logged in",

@@ -42,7 +42,6 @@ export interface IColumn {
   title: string;
   tasks: ITask[];
 }
-
 export interface IGlobalStore {
   // state variables
   requireSyncing: boolean;

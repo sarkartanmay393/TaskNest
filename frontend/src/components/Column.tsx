@@ -43,7 +43,7 @@ export default function Column({
   return (
     <Droppable droppableId={`column-${data.id}`} type="COLUMN">
       {(provided, snapshot) => (
-        <div ref={provided.innerRef} className="transition-height duration-300 ease-in-out min-w-[320px] h-min p-4 rounded-lg border border-gray-300 shadow-sm bg-gray-300" {...provided.droppableProps}>
+        <div ref={provided.innerRef} className="transition-height duration-300 ease-in-out h-min p-4 rounded-lg border border-gray-300 shadow-sm bg-gray-300" {...provided.droppableProps}>
           <h2 className="text-lg font-semibold mb-4">{data.title}</h2>
           <div className={cn("max-h-[60vh] space-y-2 rounded-lg overflow-y-auto", snapshot.isDraggingOver && "bg-gray-300")}>
             {globalIsLoading &&

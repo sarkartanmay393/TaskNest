@@ -1,6 +1,12 @@
 import { Button } from "~/components/ui/button";
+import { useStoreState } from "~/state/typedHooks";
 
 export default function HomePage() {
+  const { tasks } = useStoreState(state => state);
+  if (tasks.length > 0) {
+    window.location.href = "/board";
+  }
+
   return (
     <div className="border min-h-[calc(100vh-100px)] radius-lg bg-gradient-to-b from-blue-100 to-white flex flex-col items-center justify-center p-4">
       <div className="max-w-2xl w-full text-center">

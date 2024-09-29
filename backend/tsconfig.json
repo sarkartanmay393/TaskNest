@@ -63,6 +63,7 @@
       ],
     },
     "useUnknownInCatchVariables": false,
+    "resolveJsonModule": true,
   },
   "include": [
     "src/**/*.ts",

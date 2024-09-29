@@ -70,6 +70,7 @@ const deleteTask = async (req: ReqType, res: ResType) => {
 
 const getAllTasks = async (req: ReqType, res: ResType) => {
   const { userid } = req.headers as { userid: string };
+  console.log('userid', userid);
   const { id, search, sortBy, pagination, start, count } = req.query as unknown as { id?: string, search?: string, sortBy?: string, pagination?: string, start?: string, count?: string };
   try {
     if (id) {

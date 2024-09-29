@@ -1,17 +1,27 @@
 import { ITask } from "~/interfaces";
 import { headers } from "../worker/WebWorker";
 import { baseUrl } from "./network";
-import { LoginPayload, SignUpPayload } from "./types";
+import { LoginPayload, SignUpPayload, StoreGoogleIdPayload } from "./types";
+
+const getLocalHeaders = () => {
+  let accessToken = sessionStorage.getItem("accessToken");
+  return {
+  ...headers,
+  'token': accessToken ?? "",
+  }
+}
 
 export const logoutApi = async () => {
   try {
     const resp = await fetch(baseUrl + "/api/logout", {
       method: "GET",
-      headers: headers,
+      headers: getLocalHeaders(),
       credentials: "include",
     });
+    sessionStorage.clear();
+    localStorage.clear();
     if (resp.status !== 200) {
-      throw new Error("Failed to logout");
+      return Error("Failed to logout from server");
     }
     return true;
   } catch (err) {
@@ -20,11 +30,30 @@ export const logoutApi = async () => {
   }
 }
 
+export const storeGoogleIdApi = async (payload: StoreGoogleIdPayload) => {
+  try {
+    const resp = await fetch(baseUrl + "/api/storeGoogleId", {
+      method: "POST",
+      headers: getLocalHeaders(),
+      credentials: "include",
+      body: JSON.stringify(payload),
+    }) as any;
+    if (resp.status !== 200) {
+      throw new Error("Failed to store googleId");
+    }
+    const data = await resp.json() as { userConfig?: StoreGoogleIdPayload };
+    return data;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
 export const signUpApi = async (payload: SignUpPayload) => {
   try {
     const { user, token, error } = await fetch(baseUrl + "/api/signup", {
       method: "POST",
-      headers: headers,
+      headers: getLocalHeaders(),
       credentials: "include",
       body: JSON.stringify(payload),
     }) as any;
@@ -43,7 +72,7 @@ export const loginApi = async (payload: LoginPayload) => {
   try {
     const resp = await fetch(baseUrl + "/api/login", {
       method: "POST",
-      headers: headers,
+      headers: getLocalHeaders(),
       credentials: "include",
       body: JSON.stringify(payload),
     }) as any;
@@ -53,6 +82,7 @@ export const loginApi = async (payload: LoginPayload) => {
     const data = await resp.json();
     return { user: data.user, token: data.token };
   } catch (err: any) {
+    console.log('TEST', err);
     throw new Error(err);
   }
 };
@@ -61,7 +91,7 @@ export const logOutApi = async (navigateTo: any) => {
   try {
     await fetch(baseUrl + "/api/logout", {
       method: "GET",
-      headers: headers,
+      headers: getLocalHeaders(),
       credentials: "include",
     });
     navigateTo("/login", { replace: true });
@@ -74,7 +104,7 @@ export const createTaskApi = async (task: any) => {
   try {
     await fetch(baseUrl + "/api/task/create", {
       method: "POST",
-      headers: headers,
+      headers: getLocalHeaders(),
       credentials: "include",
       body: JSON.stringify(task),
     });
@@ -87,7 +117,7 @@ export const updateTaskApi = async (task: any) => {
   try {
     await fetch(baseUrl + "/api/task/update", {
       method: "POST",
-      headers: headers,
+      headers: getLocalHeaders(),
       credentials: "include",
       body: JSON.stringify(task),
     });
@@ -100,7 +130,7 @@ export const deleteTaskApi = async (taskId: any) => {
   try {
     await fetch(baseUrl + "/api/task/delete", {
       method: "POST",
-      headers: headers,
+      headers: getLocalHeaders(),
       credentials: "include",
       body: JSON.stringify({ taskId }),
     });
@@ -113,7 +143,7 @@ export const getTasksApi = async ({}: { taskId?: string | number, pagination?: {
   try {
     const resp = await fetch(baseUrl + "/api/task/get", {
       method: "GET",
-      headers: headers,
+      headers: getLocalHeaders(),
       credentials: "include",
       // query: {
       //   id: taskId,
@@ -151,7 +181,7 @@ export const syncTasksApi = async (payload: {
     console.log(formattedTasks, 'formattedTasks');
     const resp = await fetch(baseUrl + "/api/task/bulkUpdate", {
       method: "POST",
-      headers: headers,
+      headers: getLocalHeaders(),
       credentials: "include",
       body: JSON.stringify(formattedTasks),
     });
