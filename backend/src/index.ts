@@ -4,7 +4,7 @@ dotenv.config();
 import * as cors from "cors";
 import express from "express";
 import cookie from "cookie-parser";
-import rateLimit from 'express-rate-limit';
+// import rateLimit from 'express-rate-limit';
 
 import {
   createTask,
@@ -21,14 +21,14 @@ import authMiddleware from "./middlewares/authMiddleware";
 
 const PORT = process.env.PORT || 8080;
 const app = express();
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 250,
-  message: {
-    message: 'Too many requests, please try again later.',
-    status: 429,
-  }
-});
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 250,
+//   message: {
+//     message: 'Too many requests, please try again later.',
+//     status: 429,
+//   }
+// });
 
 // Middlewares
 app.use(
@@ -37,7 +37,7 @@ app.use(
     credentials: true,
   })
 );
-app.use(limiter);
+// app.use(limiter);
 app.use(cookie());
 app.use(express.json());
 
