@@ -9,7 +9,6 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { toast } from "~/hooks/use-toast";
 import { loginApi, storeGoogleIdApi } from "~/lib/apis";
-import googleLogo from "~/assets/google.svg";
 
 type FormData = {
   email: string

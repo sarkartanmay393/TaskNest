@@ -68,6 +68,7 @@ const deleteTask = async (req, res) => {
 exports.deleteTask = deleteTask;
 const getAllTasks = async (req, res) => {
     const { userid } = req.headers;
+    console.log('userid', userid);
     const { id, search, sortBy, pagination, start, count } = req.query;
     try {
         if (id) {
@@ -161,7 +162,19 @@ const getAllTasks = async (req, res) => {
             const columns = await prisma.column.findMany();
             console.log(tasks, 'tasks');
             console.log(columns, 'columns');
-            return res.json({ tasks, columns });
+            const syncInfo = await prisma.syncInfo.upsert({
+                where: {
+                    userId: Number(userid),
+                },
+                create: {
+                    userId: Number(userid),
+                    lastSuccessfulSyncAt: new Date().toISOString(),
+                },
+                update: {
+                    lastSuccessfulSyncAt: new Date().toISOString(),
+                },
+            });
+            return res.json({ tasks, columns, syncInfo });
         }
     }
     catch (err) {
@@ -238,7 +251,19 @@ const bulkUpdateTasks = async (req, res) => {
                 userId: Number(userid),
             },
         });
-        return res.json({ createdTasks, updatedTasks, allTasks, lastSuccessfulSyncAt: new Date().toISOString(), status: "success" });
+        const syncInfo = await prisma.syncInfo.upsert({
+            where: {
+                userId: Number(userid),
+            },
+            create: {
+                userId: Number(userid),
+                lastSuccessfulSyncAt: new Date().toISOString(),
+            },
+            update: {
+                lastSuccessfulSyncAt: new Date().toISOString(),
+            },
+        });
+        return res.json({ syncInfo, createdTasks, updatedTasks, allTasks, lastSuccessfulSyncAt: new Date().toISOString(), status: "success" });
     }
     catch (error) {
         console.log(error);

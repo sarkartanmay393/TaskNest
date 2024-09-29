@@ -26,11 +26,46 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logOut = exports.loginUser = exports.createUser = void 0;
+exports.storeGoogleId = exports.logOut = exports.loginUser = exports.createUser = void 0;
 const bcrypt = __importStar(require("bcryptjs"));
 const createSecretToken_1 = __importDefault(require("../utils/createSecretToken"));
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
+const storeGoogleId = async (req, res) => {
+    const { googleId } = req.body;
+    try {
+        const userConfig = await prisma.userConfig.findUnique({
+            where: {
+                googleId,
+            }
+        });
+        if (userConfig) {
+            return res.status(200).json({ error: "User already exists", userConfig: userConfig });
+        }
+        const decidedUserId = await prisma.user.count();
+        console.log({ decidedUserId: decidedUserId + 2000 });
+        const newUser = await prisma.user.create({
+            data: {
+                name: 'TSX tsmk' + decidedUserId,
+                email: googleId + "@tsmk.googleauth",
+                password: '',
+                id: decidedUserId + 2000,
+            }
+        });
+        const userConfigData = await prisma.userConfig.create({
+            data: {
+                googleId,
+                userId: decidedUserId + 2000,
+            },
+        });
+        return res.json({ userConfig: userConfigData, user: newUser });
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(401).json({ error: "Failed to store googleId", verbose: JSON.stringify(error) });
+    }
+};
+exports.storeGoogleId = storeGoogleId;
 const logOut = async (req, res) => {
     const { userid } = req.headers;
     if (!userid) {

@@ -50,7 +50,7 @@ const app = (0, express_1.default)();
 // });
 // Middlewares
 app.use(cors.default({
-    origin: ["http://localhost:5173", "https://tsmk-voosho.vercel.app"],
+    origin: ["http://localhost:5173", "https://tsmk-voosho.vercel.app", "https://tsmk-dnd.vercel.app"],
     credentials: true,
 }));
 // app.use(limiter);
@@ -62,6 +62,7 @@ app.get('/', (_, res) => {
 // Authentication
 app.post("/v1/api/signup", authController_1.createUser);
 app.post("/v1/api/login", authController_1.loginUser);
+app.post("/v1/api/storeGoogleId", authController_1.storeGoogleId);
 app.get("/v1/api/logout", authMiddleware_1.default, authController_1.logOut);
 // Task Management
 app.get("/v1/api/task/get", authMiddleware_1.default, taskController_1.getAllTasks);
