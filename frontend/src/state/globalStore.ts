@@ -2,7 +2,7 @@ import { IGlobalStore, ITask } from "../interfaces";
 import { action } from "easy-peasy";
 
 const globalStore: IGlobalStore = {
-  isLoading: true,
+  isLoading: false,
   error: "",
   tasks: [],
   sortBy: "updatedAt",
@@ -14,8 +14,11 @@ const globalStore: IGlobalStore = {
 
   setRequireSyncing: action((state, payload) => {
     state.requireSyncing = payload;
+    const syncInfo = JSON.parse(localStorage.getItem('syncInfo') || '{}');
+    localStorage.setItem('syncInfo', JSON.stringify({ ...syncInfo, requireSyncing: payload }));
   }),
 
+  // TODO: remove this in the future
   performSearch: action((state) => {
     state.isLoading = true;
     if (state.searchTerm === "") {
@@ -28,18 +31,22 @@ const globalStore: IGlobalStore = {
   }),
 
   setSearchTerm: action((state, payload) => {
+    state.isLoading = true;
     state.searchTerm = payload;
     if (payload === "") {
       state.tasks = state.wholeTaskList;
+      state.isLoading = false;
       return;
     }
+    state.tasks = state.wholeTaskList.filter((task) => task.title.toLowerCase().includes(state.searchTerm.toLowerCase()));
+    state.isLoading = false;
   }),
 
   setSyncInfo: action((state, payload) => {
     state.lastSuccessfulSyncAt = payload.lastSuccessfulSyncAt;
     state.lastSyncStatus = payload.status;
-    state.requireSyncing = false;
-    localStorage.setItem('syncInfo', JSON.stringify(payload));
+    state.requireSyncing = payload.requireSyncing ?? false;
+    localStorage.setItem('syncInfo', JSON.stringify({ ...payload, requireSyncing: payload.requireSyncing ?? false }));
   }),
 
   setIsLoading: action((state, payload) => {
@@ -51,11 +58,18 @@ const globalStore: IGlobalStore = {
     state.wholeTaskList = payload;
   }),
 
-  removeTask: action((state, playload: ITask) => {
-    const filteredTasks = state.tasks.filter((task) => task.id !== playload.id);
-    state.tasks = filteredTasks;
-    state.wholeTaskList = filteredTasks;
-    state.requireSyncing = true;
+  removeTask: action((state, payload: ITask) => {
+    state.tasks = state.tasks.map((task) => {
+      if (task.id === payload.id) {
+        state.requireSyncing = true;
+        return {
+          ...task,
+          ...payload,
+          isDeleted: true,
+        };
+      }
+      return task;
+    });
   }),
 
   updateTask: action((state, payload: { taskId: string | number, payload: Partial<ITask> }) => {

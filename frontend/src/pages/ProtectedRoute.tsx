@@ -1,10 +1,9 @@
 import { PlusIcon } from "lucide-react";
-import React, { useEffect } from "react";
+import React from "react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { toast } from "~/hooks/use-toast";
-import { getTasksApi, logoutApi } from "~/lib/apis";
-import { useStoreActions } from "~/state/typedHooks";
+import { logoutApi } from "~/lib/apis";
 
 export default function ProtectedRoute({ children }: any) {
   const accessToken = sessionStorage.getItem("accessToken");
@@ -12,27 +11,28 @@ export default function ProtectedRoute({ children }: any) {
     sessionStorage.clear();
     window.location.href = "/login";
   } else {
-    const [isAddNewModalOpen, setIsAddNewModalOpen] = useState(false)
-    const { setIsLoading, setTasks } = useStoreActions(action => action);
-    useEffect(() => {
-      // Handles loading tasks from the API
-      (async () => {
-        try {
-          setIsLoading(true);
-          const { tasks } = await getTasksApi({}) as any;
-          setTasks(tasks.map((task: any) => ({ ...task, hasChanged: false })));
-        } catch (err) {
-          toast({
-            title: "Database isn't available",
-            description: "Failed to load tasks",
-            duration: 5000,
-          })
-          console.log(err);
-        } finally {
-          setIsLoading(false);
-        }
-      })();
-    }, []);
+    const [isAddNewModalOpen, setIsAddNewModalOpen] = useState(false);
+    // TODO: making the app offline first
+    // const { setIsLoading, setTasks } = useStoreActions(action => action);
+    // useEffect(() => {
+    //   // Handles loading tasks from the API
+    //   (async () => {
+    //     try {
+    //       setIsLoading(true);
+    //       const { tasks } = await getTasksApi({}) as any;
+    //       setTasks(tasks.map((task: any) => ({ ...task, hasChanged: false })));
+    //     } catch (err) {
+    //       toast({
+    //         title: "Database isn't available",
+    //         description: "Failed to load tasks",
+    //         duration: 5000,
+    //       })
+    //       console.log(err);
+    //     } finally {
+    //       setIsLoading(false);
+    //     }
+    //   })();
+    // }, []);
 
     return (
       <div>

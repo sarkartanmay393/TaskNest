@@ -16,8 +16,15 @@ export default function Column({
   onEditClick: any,
 }
 ) {
-  const { tasks, isLoading: globalIsLoading } = useStoreState((state) => state);
-  const currentTasks = useMemo(() => tasks.filter((task) => task.columnId === data.id), [tasks]);
+  const { tasks, isLoading: globalIsLoading, sortBy } = useStoreState((state) => state);
+  
+  const currentTasks = useMemo(() =>
+    tasks.filter((task) => task.columnId === data.id && task.isDeleted !== true).
+      sort((a, b) => sortBy === 'updatedAt' ?
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime() :
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
+    [tasks, data.id]);
+
   const TaskList = useMemo(() =>
     currentTasks.map((task, index) => (
       <TaskCard

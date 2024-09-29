@@ -180,11 +180,13 @@ export const bulkUpdateTasks = async (req: ReqType, res: ResType) => {
       createdAt: string;
       updatedAt: string;
       new: boolean | undefined;
+      isDeleted: boolean | undefined;
   }[];
 
   try {
     const createTasks: any[] = [];
     const updateTasks: any[] = [];
+    const deleteTasks: any[] = [];
 
     for (const task of tasks) {
       if (task.new) {
@@ -195,6 +197,10 @@ export const bulkUpdateTasks = async (req: ReqType, res: ResType) => {
           createdAt: new Date(task.createdAt),
           updatedAt: new Date(task.updatedAt),
           userId: Number(userid),
+        });
+      } else if (task.isDeleted) {
+        deleteTasks.push({
+          id: Number(task.id),
         });
       } else {
         updateTasks.push({
@@ -207,21 +213,39 @@ export const bulkUpdateTasks = async (req: ReqType, res: ResType) => {
       }
     }
 
-    const updatedTasks = await Promise.all(updateTasks.map(async (task) => {
-      return await prisma.task.update({
-        where: { id: task.id },
-        data: {
-          title: task.title,
-          description: task.description,
-          columnId: task.columnId,
-          updatedAt: task.updatedAt,
+    let updatedTasks: any[] = [];
+    let createdTasks;
+    let deletedTasks;
+
+    if (updateTasks.length > 0) {
+      updatedTasks = await Promise.all(updateTasks.map(async (task) => {
+        return await prisma.task.update({
+          where: { id: task.id },
+          data: {
+            title: task.title,
+            description: task.description,
+            columnId: task.columnId,
+            updatedAt: task.updatedAt,
+          },
+        });
+      }));
+    }
+
+    if (createTasks.length > 0) {
+      createdTasks = await prisma.task.createMany({
+        data: createTasks,
+      });
+    }
+
+    if (deleteTasks.length > 0) {
+      deletedTasks = await prisma.task.deleteMany({
+        where: {
+          id: {
+            in: deleteTasks.map((task) => task.id),
+          },
         },
       });
-    }));
-
-    const createdTasks = await prisma.task.createMany({
-      data: createTasks,
-    });
+    }
 
     const allTasks = await prisma.task.findMany({
       where: {

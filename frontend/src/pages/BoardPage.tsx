@@ -15,7 +15,7 @@ import { Dot } from "lucide-react";
 import { columns } from "~/lib/constants";
 import { checkDifferences } from "~/lib/utils";
 
-export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: { isAddNewModalOpen: boolean, setIsAddNewModalOpen: any }) {
+export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: { isAddNewModalOpen?: boolean, setIsAddNewModalOpen?: any }) {
   const { tasks, lastSyncStatus, lastSuccessfulSyncAt, isLoading, requireSyncing, searchTerm, sortBy } = useStoreState((state) => state);
   const { updateTask, setTasks, setIsLoading, setSyncInfo, setRequireSyncing, setSearchTerm, performSearch, setSortBy } = useStoreActions((action) => action);
 
@@ -69,6 +69,14 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
   }, []);
 
   const handleSyncClick = useMemo(() => () => {
+    if (tasks.length === 0) {
+      toast({
+        title: "No tasks to sync",
+        description: "Please add some tasks first",
+        duration: 5000,
+      })
+      return;
+    }
     toast({
       title: "Syncing tasks...",
       description: "Please wait",
@@ -97,7 +105,7 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
   }, [tasks]);
 
   const handleDragEnd = (result: DropResult) => {
-    const { destination, source, draggableId } = result;
+    const { destination, draggableId } = result;
 
     if (!destination) {
       return;
@@ -160,7 +168,7 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
       </div>
       <TaskModal isOpen={!!selectedTask} onClose={closeTaskModal} task={selectedTask} />
       <EditTaskModal isOpen={!!editingTask} onClose={closeEditModal} task={editingTask} onSave={handleEditTask} />
-      <AddNewTaskModal isOpen={isAddNewModalOpen} onClose={() => setIsAddNewModalOpen(false)} />
+      {isAddNewModalOpen && <AddNewTaskModal isOpen={isAddNewModalOpen} onClose={() => setIsAddNewModalOpen(false)} />}
     </div>
   );
 }

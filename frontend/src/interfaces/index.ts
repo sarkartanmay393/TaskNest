@@ -34,6 +34,7 @@ export interface ITask {
   updatedAt: string;
   hasChanged?: boolean;
   new?: boolean;
+  isDeleted?: boolean;
 }
 
 export interface IColumn {
@@ -56,7 +57,7 @@ export interface IGlobalStore {
 
   setRequireSyncing: Action<IGlobalStore, boolean>;
   setSearchTerm: Action<IGlobalStore, string>;
-  setSyncInfo: Action<IGlobalStore, { lastSuccessfulSyncAt: string, status: string }>;
+  setSyncInfo: Action<IGlobalStore, { lastSuccessfulSyncAt: string, status: string, requireSyncing?: boolean }>;
   // data fetching
   setIsLoading: Action<IGlobalStore, boolean>;
   setError: Action<IGlobalStore, string>;

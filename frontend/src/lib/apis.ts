@@ -137,15 +137,18 @@ export const syncTasksApi = async (payload: {
   tasks: ITask[];
 }) => {
   try {
-    const formattedTasks = payload.tasks.filter((task => task.new || task.hasChanged)).map((task) => ({
+    console.log(payload.tasks, 'tasks');
+    const formattedTasks = payload.tasks.filter((task => task.new || task.hasChanged || task.isDeleted)).map((task) => ({
       id: task.id,
       title: task.title,
       description: task.description,
       columnId: task.columnId,
       createdAt: task.createdAt,
       updatedAt: task.updatedAt,
-      new: task.new,
+      new: task?.new,
+      isDeleted: task?.isDeleted,
     }));
+    console.log(formattedTasks, 'formattedTasks');
     const resp = await fetch(baseUrl + "/api/task/bulkUpdate", {
       method: "POST",
       headers: headers,

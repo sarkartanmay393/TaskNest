@@ -18,7 +18,7 @@ function App() {
     console.log('loaded tasks from local storage');
   }
   if (Object.keys(syncInfoParsed).length > 0) {
-    setSyncInfo({ status: syncInfoParsed?.status ?? '', lastSuccessfulSyncAt: syncInfoParsed?.lastSuccessfulSyncAt ?? '' });
+    setSyncInfo({ status: syncInfoParsed?.status ?? '', lastSuccessfulSyncAt: syncInfoParsed?.lastSuccessfulSyncAt ?? '', requireSyncing: syncInfoParsed?.requireSyncing ?? false });
     console.log('loaded syncInfo from local storage');
   }
 
