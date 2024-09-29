@@ -8,6 +8,9 @@ import { Label } from "~/components/ui/label";
 import { signUpApi } from "~/lib/apis";
 import { toast } from "~/hooks/use-toast";
 
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth } from "../../firebase.config"; // Import your Firebase config
+
 type FormData = {
   firstName: string
   lastName: string
@@ -41,6 +44,35 @@ export default function SignupPage() {
       })
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  const handleGoogleSignup = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+
+      const user = result.user;
+      console.log("User signed in:", user);
+      const token = await user.getIdToken();
+      sessionStorage.setItem("accessToken", token);
+      sessionStorage.setItem("user", JSON.stringify({
+        id: user.uid,
+        email: user.email,
+        name: user.displayName,
+      }));
+      toast({
+        title: "Signup successful",
+        description: "You are now signed up",
+        duration: 3000,
+      })
+      navigate('/')
+    } catch (error: unknown) {
+      toast({
+        title: "Signup failed",
+        description: "Please try again",
+        duration: 3000,
+      })
     }
   }
 
@@ -129,7 +161,7 @@ export default function SignupPage() {
           </p>
         </div>
         <div className="mt-4">
-          <Button variant="outline" className="w-full border-blue-500 text-blue-500 hover:bg-blue-50">
+          <Button variant="outline" onClick={handleGoogleSignup} className="w-full border-blue-500 text-blue-500 hover:bg-blue-50">
             Signup with Google
           </Button>
         </div>

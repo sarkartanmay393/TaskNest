@@ -1,3 +1,5 @@
+import { auth } from "../../firebase.config";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useState } from "react";
 import { useForm } from 'react-hook-form'
 import { useNavigate } from "react-router-dom";
@@ -41,6 +43,36 @@ export default function LoginPage() {
       setIsSubmitting(false);
     }
   };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+
+      const user = result.user;
+      console.log("User signed in:", user);
+      const token = await user.getIdToken();
+      sessionStorage.setItem("accessToken", token);
+      sessionStorage.setItem("user", JSON.stringify({
+        id: user.uid,
+        email: user.email,
+        name: user.displayName,
+      }));
+      toast({
+        title: "Login successful",
+        description: "You are now logged in",
+        duration: 3000,
+      })
+      navigate("/");
+    } catch (error: any) {
+      console.log(error);
+      toast({
+        title: "Login failed",
+        description: error.message,
+        duration: 3000,
+      })
+    }
+  }
 
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-gray-100">
@@ -88,7 +120,7 @@ export default function LoginPage() {
           </p>
         </div>
         <div className="mt-4">
-          <Button variant="outline" className="w-full border-blue-500 text-blue-500 hover:bg-blue-50">
+          <Button onClick={handleGoogleLogin} variant="outline" className="w-full border-blue-500 text-blue-500 hover:bg-blue-50">
             Login with Google
           </Button>
         </div>
