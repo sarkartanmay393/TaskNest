@@ -8,7 +8,7 @@ import { Label } from "~/components/ui/label";
 import { signUpApi } from "~/lib/apis";
 import { toast } from "~/hooks/use-toast";
 
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "../../firebase.config"; // Import your Firebase config
 
 type FormData = {

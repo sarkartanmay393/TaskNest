@@ -8,6 +8,7 @@
       "config": { "includeFiles": ["dist/**"] }
     }
   ],
+  
   "devCommand": "PORT=8080 npm run dev",
   "routes": [{ "src": "/(.*)", "dest": "dist/index.js" }]
 }
