@@ -4,6 +4,7 @@ import { IColumn } from "../interfaces";
 import TaskCard from "./TaskCard";
 import { useStoreState } from "~/state/typedHooks";
 import { useMemo } from "react";
+import { cn } from "~/lib/utils";
 
 export default function Column({
   data,
@@ -31,9 +32,9 @@ export default function Column({
   return (
     <Droppable droppableId={`column-${data.id}`} type="COLUMN">
       {(provided, snapshot) => (
-        <div ref={provided.innerRef} className="min-w-[320px] bg-gray-100 p-4 rounded-lg border border-gray-200 shadow-md bg-gray-300" {...provided.droppableProps}>
+        <div ref={provided.innerRef} className="transition-height duration-300 ease-in-out min-w-[320px] h-min p-4 rounded-lg border border-gray-200 shadow-md bg-gray-200" {...provided.droppableProps}>
           <h2 className="text-lg font-semibold mb-4">{data.title}</h2>
-          <div className="space-y -4 rounded-lg" style={getListStyle(snapshot.isDraggingOver)}>
+          <div className={cn("space-y-2 rounded-lg", snapshot.isDraggingOver && "bg-gray-300")}>
             {globalIsLoading &&
               <div className="text-center text-gray-400 my-2 mt-4">
                 Loading...
@@ -52,7 +53,3 @@ export default function Column({
     </Droppable>
   );
 }
-
-const getListStyle = (isDraggingOver: boolean) => ({
-  background: isDraggingOver ? 'lightblue' : 'lightgrey',
-});
