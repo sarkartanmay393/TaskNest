@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "tskm-backend",
+  "name": "tsmk-backend",
   "builds": [
     {
       "src": "dist/index.js",
