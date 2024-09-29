@@ -27,3 +27,4 @@ backend/.env
 
 
 .vercel
+dist
