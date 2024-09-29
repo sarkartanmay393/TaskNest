@@ -9,6 +9,17 @@ const globalStore: IGlobalStore = {
   sortBy: "updatedAt",
   lastSuccessfulSyncAt: "",
   lastSyncStatus: "success",
+  searchTerm: "",
+  wholeTaskList: [],
+
+  setSearchTerm: action((state, payload) => {
+    state.searchTerm = payload;
+    if (payload === "") {
+      state.tasks = state.wholeTaskList;
+      return;
+    }
+    state.tasks = state.tasks.filter((task) => task.title.toLowerCase().includes(payload.toLowerCase()));
+  }),
 
   setSyncInfo: action((state, payload) => {
     state.lastSuccessfulSyncAt = payload.lastSuccessfulSyncAt;
@@ -22,6 +33,7 @@ const globalStore: IGlobalStore = {
 
   setTasks: action((state, payload: ITask[]) => {
     state.tasks = payload;
+    state.wholeTaskList = payload;
   }),
 
   setTasksByColumn: action((state, payload: { tasks: ITask[]; columnId: number; }) => {
@@ -41,6 +53,7 @@ const globalStore: IGlobalStore = {
   removeTask: action((state, playload: ITask) => {
     const filteredTasks = state.tasks.filter((task) => task.id !== playload.id);
     state.tasks = filteredTasks;
+    state.wholeTaskList = filteredTasks;
   }),
 
   changeStatus: action((state, payload: { status: TASK_STATUS; id: number; }) => {

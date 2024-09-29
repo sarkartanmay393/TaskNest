@@ -48,14 +48,14 @@ const checkDifferences = (storedTasks: ITask[], currentTasks: ITask[]): boolean 
 
 export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: { isAddNewModalOpen: boolean, setIsAddNewModalOpen: any }) {
   const { tasks, lastSyncStatus, lastSuccessfulSyncAt, isLoading } = useStoreState((state) => state);
-  const { setTasks, setIsLoading, setSyncInfo } =
-    useStoreActions((action) => action);
+  const { setTasks, setIsLoading, setSyncInfo } = useStoreActions((action) => action);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('recent');
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
   const [editingTask, setEditingTask] = useState<ITask | null>(null);
 
+  // Handles loading tasks from the API
   useEffect(() => {
     (async () => {
       try {
@@ -70,6 +70,7 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
     })();
   }, []);
 
+  // Handles loading tasks from local storage
   useEffect(() => {
     const tasksLS = localStorage.getItem('tasks');
     if (tasksLS && tasksLS !== '[]' && tasksLS !== "undefined" && tasksLS !== null) {
@@ -83,14 +84,10 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
     console.log('tasks saved on local storage');
   }, [tasks]);
 
+  // Handles syncing tasks every 5 minutes
   useEffect(() => {
     const timeout = setTimeout(async () => {
-      const { status, lastSuccessfulSyncAt, createdTasks } = await syncTasksApi({ tasks });
-      console.log({ status, lastSuccessfulSyncAt, createdTasks });
-      localStorage.removeItem('syncInfo');
-      localStorage.removeItem('tasks');
-      setSyncInfo({ status, lastSuccessfulSyncAt });
-      setTasks(tasks.filter((task) => !createdTasks.some((createdTask) => createdTask.id === task.id)).concat(createdTasks).map((task) => ({ ...task, hasChanged: false })));
+      handleSyncClick();
     }, 5 * 60 * 1000);
 
     return () => clearTimeout(timeout);
@@ -105,7 +102,6 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
   }
 
   const openEditModal = (task: ITask) => {
-    console.log(task)
     setEditingTask(task)
   }
 
@@ -116,22 +112,6 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
   const handleEditTask = () => {
     closeEditModal()
   }
-
-  const handleDragEnd = (result: DropResult) => {
-    const { destination, source, draggableId } = result;
-
-    if (!destination) {
-      return;
-    }
-
-    if (destination.droppableId === source.droppableId && destination.index === source.index) {
-      return;
-    }
-
-    // Perform the reordering logic here
-
-    console.log(`From column: ${source.droppableId}, to column: ${destination.droppableId}, draggableId: ${draggableId}`);
-  };
 
   const handleSyncClick = () => {
     toast({
@@ -160,6 +140,23 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
       setIsLoading(false);
     });
   }
+
+  // TODO: handle drag and drop
+  const handleDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+
+    if (!destination) {
+      return;
+    }
+
+    if (destination.droppableId === source.droppableId && destination.index === source.index) {
+      return;
+    }
+
+    // Perform the reordering logic here
+
+    console.log(`From column: ${source.droppableId}, to column: ${destination.droppableId}, draggableId: ${draggableId}`);
+  };
 
   return (
     <div className="container mx-auto p-4">

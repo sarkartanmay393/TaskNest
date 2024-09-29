@@ -51,6 +51,10 @@ export interface IGlobalStore {
   sortBy: string;
   lastSuccessfulSyncAt: string;
   lastSyncStatus: string;
+  searchTerm: string;
+  wholeTaskList: ITask[];
+
+  setSearchTerm: Action<IGlobalStore, string>;
 
   setSyncInfo: Action<IGlobalStore, { lastSuccessfulSyncAt: string, status: string }>;
   // data fetching
