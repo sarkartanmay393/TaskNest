@@ -26,14 +26,14 @@ export default function TaskCard({ data, onClick, onEditClick, index }: TaskProp
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={cn("bg-gray-100 p-4 min-w-[240px] rounded-lg shadow cursor-move select-none", 
+          className={cn("bg-gray-100 p-4 gap-2 min-w-[240px] rounded-lg shadow cursor-move select-none", 
             snapshot.isDragging && "bg-gray-50",
           )}
         >
           <h3 className="font-semibold">{data.title}</h3>
-          <p className="text-sm text-gray-600">{data.description}</p>
-          <p className="text-xs text-gray-400 mt-2">Created at: {data.createdAt}</p>
+          <p className="text-sm text-gray-600">{data.description.length ? data.description : "No description"}</p>
           <div className="flex justify-end space-x-2 mt-2">
+            <p className="text-xs text-gray-400 mt-2 flex-1">Updated: {new Date(data.updatedAt).toLocaleString('en-US', { timeStyle: 'short' })}</p>
             <Button variant="outline" size="sm" onClick={onEditClick}>Edit</Button>
             <Button variant="outline" size="sm" onClick={handleDelete}>Delete</Button>
             <Button variant="outline" size="sm" onClick={onClick}>View Details</Button>

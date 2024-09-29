@@ -23,7 +23,7 @@ function App() {
   }
 
   return (
-    <div className="overflow-x-hidden overflow-y-auto w-[100vw] h-[100vh] flex flex-col p-4 bg-gray-100">
+    <div className="overflow-y-auto w-[100vw] h-[100vh] flex flex-col py-4 bg-gray-100">
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<ProtectedRoute><HomePage/></ProtectedRoute>} />

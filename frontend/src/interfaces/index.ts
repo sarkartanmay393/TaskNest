@@ -49,7 +49,7 @@ export interface IGlobalStore {
   isLoading: boolean;
   error: string;
   tasks: ITask[];
-  sortBy: string;
+  sortBy: "updatedAt" | "createdAt";
   lastSuccessfulSyncAt: string;
   lastSyncStatus: string;
   searchTerm: string;
@@ -62,7 +62,7 @@ export interface IGlobalStore {
   setIsLoading: Action<IGlobalStore, boolean>;
   setError: Action<IGlobalStore, string>;
   setTasks: Action<IGlobalStore, ITask[]>;
-  setSortBy: Action<IGlobalStore, string>;
+  setSortBy: Action<IGlobalStore,  "updatedAt" | "createdAt">;
 
   // Task management
   removeTask: Action<IGlobalStore, ITask>;

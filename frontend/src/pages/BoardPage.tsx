@@ -13,12 +13,11 @@ import { Toggle } from "~/components/ui/toggle";
 import { toast } from "~/hooks/use-toast";
 import { Dot } from "lucide-react";
 import { columns } from "~/lib/constants";
-import { checkDifferences } from "~/lib/utils";
+import { checkDifferences, cn } from "~/lib/utils";
 
 export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: { isAddNewModalOpen?: boolean, setIsAddNewModalOpen?: any }) {
-  const { tasks, lastSyncStatus, lastSuccessfulSyncAt, isLoading, requireSyncing, searchTerm, sortBy } = useStoreState((state) => state);
+  const { tasks, lastSuccessfulSyncAt, isLoading, requireSyncing, searchTerm, sortBy } = useStoreState((state) => state);
   const { updateTask, setTasks, setIsLoading, setSyncInfo, setRequireSyncing, setSearchTerm, performSearch, setSortBy } = useStoreActions((action) => action);
-
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
   const [editingTask, setEditingTask] = useState<ITask | null>(null);
 
@@ -43,7 +42,7 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
         return;
       }
       handleSyncClick();
-    }, 5 * 60 * 1000);
+    }, 1 * 60 * 1000);
 
     return () => clearTimeout(timeout);
   }, [])
@@ -85,7 +84,7 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
     syncTasksApi({ tasks }).then(({ status, lastSuccessfulSyncAt, allTasks }) => {
       localStorage.removeItem('syncInfo');
       localStorage.removeItem('tasks');
-      setSyncInfo({ status, lastSuccessfulSyncAt });
+      setSyncInfo({ status, lastSuccessfulSyncAt, requireSyncing: false });
       setTasks(allTasks.map((task) => ({ ...task, hasChanged: false })));
       toast({
         title: "Synced successfully",
@@ -134,7 +133,7 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
     ))), []);
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="mx-auto p-4 border rounded-lg shadow-sm bg-gray-200">
       <div className="flex flex-col sm:flex-row justify-between gap-2 items-center mb-6">
         <Input
           type="search"
@@ -142,16 +141,16 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && performSearch()}
-          className="max-w-sm"
+          className=" sm:max-w-sm rounded-md bg-white"
           disabled={isLoading}
         />
-        <div className="flex gap-4 items-center">
-          <Toggle disabled={isLoading || !requireSyncing} className="flex border" onClick={handleSyncClick}>
+        <div className="w-full flex flex-col sm:flex-row gap-1 items-center justify-end">
+          <Toggle disabled={isLoading || !requireSyncing} className={cn("w-full sm:w-fit flex border border-gray-300 ", requireSyncing ? "bg-red-100" : "bg-green-50")} onClick={handleSyncClick}>
             <Dot className={requireSyncing ? "text-red-500" : "text-green-500"} /> 
-            <span className="whitespace-nowrap">Last synced at: {lastSyncStatus ? new Date(lastSuccessfulSyncAt).toLocaleString('en-US', { hour12: true, timeStyle: 'short' }) : 'Never'}</span>
+            <span className="whitespace-nowrap">Last synced at: {lastSuccessfulSyncAt.length > 0 ? new Date(lastSuccessfulSyncAt).toLocaleString('en-US', { hour12: true, timeStyle: 'short' }) : 'never'}</span>
           </Toggle>
-          <Select value={sortBy} onValueChange={(val) => setSortBy(val)}>
-            <SelectTrigger disabled={isLoading} className="w-[180px]">
+          <Select value={sortBy} onValueChange={(val) => setSortBy(val as "updatedAt" | "createdAt")}>
+            <SelectTrigger disabled={isLoading} className="w-full sm:w-[180px] bg-gray-50">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
