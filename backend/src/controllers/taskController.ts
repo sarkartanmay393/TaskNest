@@ -163,7 +163,20 @@ const getAllTasks = async (req: ReqType, res: ResType) => {
       console.log(tasks, 'tasks');
       console.log(columns, 'columns');
 
-      return res.json({ tasks, columns });
+      const syncInfo = await prisma.syncInfo.upsert({
+        where: {
+          userId: Number(userid),
+        },
+        create: {
+          userId: Number(userid),
+          lastSuccessfulSyncAt: new Date().toISOString(),
+        },
+        update: {
+          lastSuccessfulSyncAt: new Date().toISOString(),
+        },
+      });
+
+      return res.json({ tasks, columns, syncInfo });
     }
   } catch (err) {
     console.log(err);
@@ -253,8 +266,21 @@ export const bulkUpdateTasks = async (req: ReqType, res: ResType) => {
         userId: Number(userid),
       },
     });
+
+    const syncInfo = await prisma.syncInfo.upsert({
+      where: {
+        userId: Number(userid),
+      },
+      create: {
+        userId: Number(userid),
+        lastSuccessfulSyncAt: new Date().toISOString(),
+      },
+      update: {
+        lastSuccessfulSyncAt: new Date().toISOString(),
+      },
+    });
     
-    return res.json({ createdTasks, updatedTasks, allTasks, lastSuccessfulSyncAt: new Date().toISOString(), status: "success" });
+    return res.json({ syncInfo, createdTasks, updatedTasks, allTasks, lastSuccessfulSyncAt: new Date().toISOString(), status: "success" });
   } catch (error) {
     console.log(error);
     return res.json({ error: "Failed to update tasks", verbose: JSON.stringify(error), status: "failed", lastSuccessfulSyncAt: new Date("1963-01-01").toISOString() });

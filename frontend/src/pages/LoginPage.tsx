@@ -9,6 +9,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { toast } from "~/hooks/use-toast";
 import { loginApi, storeGoogleIdApi } from "~/lib/apis";
+import googleLogo from "~/assets/google.svg";
 
 type FormData = {
   email: string
@@ -136,6 +137,7 @@ export default function LoginPage() {
         </div>
         <div className="mt-4">
           <Button onClick={handleGoogleLogin} variant="outline" className="w-full border-blue-500 text-blue-500 hover:bg-blue-50">
+            <img src="https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000" alt="google logo" className="w-4 h-4 mr-2" />
             Login with Google
           </Button>
         </div>

@@ -23,7 +23,9 @@ function App() {
   }
 
   return (
-    <div className="overflow-y-auto w-[100vw] h-[100vh] flex flex-col py-4 bg-gray-100">
+    <div className="overflow-y-auto w-[100vw] h-[100vh] flex flex-col py-4 bg-gray-100 roboto-normal" style={{
+      fontFamily: 'Roboto, sans-serif',
+    }}>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<ProtectedRoute><HomePage/></ProtectedRoute>} />

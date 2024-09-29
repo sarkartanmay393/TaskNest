@@ -44,3 +44,8 @@ model UserConfig {
   userId        Int      @id @default(autoincrement()) // hypothecical
   googleId  String   @unique
 }
+
+model SyncInfo {
+  userId        Int      @id @default(autoincrement())
+  lastSuccessfulSyncAt DateTime?
+}

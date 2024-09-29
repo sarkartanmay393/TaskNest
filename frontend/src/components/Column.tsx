@@ -21,10 +21,7 @@ export default function Column({
 
   const currentTasks = useMemo(() => {
     setIsLoading(true);
-    const calcTasks = tasks.filter((task) => task.columnId === data.id && task.isDeleted !== true).
-      sort((a, b) => sortBy === 'updatedAt' ?
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime() :
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    const calcTasks = tasks.filter((task) => task.columnId === data.id && task.isDeleted !== true);
     setIsLoading(false);
     return calcTasks;
   }, [tasks, data.id, sortBy]);

@@ -14,7 +14,7 @@ export default function ProtectedRoute({ children }: any) {
   } else {
     const [isAddNewModalOpen, setIsAddNewModalOpen] = useState(false);
     // TODO: making the app offline first
-    const { setIsLoading, setTasks } = useStoreActions(action => action);
+    const { setIsLoading, setTasks, setSyncInfo } = useStoreActions(action => action);
     const { tasks } = useStoreState(state => state);
     useEffect(() => {
       // Handles loading tasks from the API
@@ -22,7 +22,9 @@ export default function ProtectedRoute({ children }: any) {
         (async () => {
           try {
             setIsLoading(true);
-            const { tasks } = await getTasksApi({}) as any;
+            const { tasks, syncInfo } = await getTasksApi({}) as any;
+            setSyncInfo({ lastSuccessfulSyncAt: syncInfo.lastSuccessfulSyncAt, status: 'success', requireSyncing: false });
+            localStorage.setItem('syncInfo', JSON.stringify(syncInfo));
             setTasks(tasks.map((task: any) => ({ ...task, hasChanged: false })));
           } catch (err) {
             toast({

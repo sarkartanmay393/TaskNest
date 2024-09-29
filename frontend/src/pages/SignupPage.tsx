@@ -72,7 +72,7 @@ export default function SignupPage() {
         navigate('/');
       } else {
         console.log("Failed to store googleId");
-        const intervalId = setInterval(async() => {
+        const intervalId = setInterval(async () => {
           const data = await storeGoogleIdApi({ googleId: user.uid });
           if (data) {
             sessionStorage.setItem("userConfig", JSON.stringify(data.userConfig));
@@ -183,6 +183,7 @@ export default function SignupPage() {
         </div>
         <div className="mt-4">
           <Button variant="outline" onClick={handleGoogleSignup} className="w-full border-blue-500 text-blue-500 hover:bg-blue-50">
+            <img src="https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000" alt="google logo" className="w-4 h-4 mr-2" />
             Signup with Google
           </Button>
         </div>
