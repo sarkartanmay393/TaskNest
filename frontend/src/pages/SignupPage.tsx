@@ -9,7 +9,7 @@ import { signUpApi } from "~/lib/apis";
 import { toast } from "~/hooks/use-toast";
 
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth } from "../../firebase.config"; // Import your Firebase config
+import { auth } from "../firebase.config"; // Import your Firebase config
 
 type FormData = {
   firstName: string
