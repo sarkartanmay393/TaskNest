@@ -44,6 +44,7 @@ export interface IColumn {
 
 export interface IGlobalStore {
   // state variables
+  requireSyncing: boolean;
   isLoading: boolean;
   error: string;
   tasks: ITask[];
@@ -54,13 +55,12 @@ export interface IGlobalStore {
   searchTerm: string;
   wholeTaskList: ITask[];
 
+  setRequireSyncing: Action<IGlobalStore, boolean>;
   setSearchTerm: Action<IGlobalStore, string>;
-
   setSyncInfo: Action<IGlobalStore, { lastSuccessfulSyncAt: string, status: string }>;
   // data fetching
   setIsLoading: Action<IGlobalStore, boolean>;
   setError: Action<IGlobalStore, string>;
-  setTasksByColumn: Action<IGlobalStore, { tasks: ITask[], columnId: number }>;
   setTasks: Action<IGlobalStore, ITask[]>;
   setSortBy: Action<IGlobalStore, string>;
   setColumns: Action<IGlobalStore, IColumn[]>;
@@ -69,7 +69,7 @@ export interface IGlobalStore {
   // addTask: Action<IGlobalStore, ITask>;
   removeTask: Action<IGlobalStore, ITask>;
   updateTask: Action<IGlobalStore, ITask>;
-  changeStatus: Action<IGlobalStore, { status: TASK_STATUS; id: number }>;
+  performSearch: Action<IGlobalStore>;
 
   //  utils
 }

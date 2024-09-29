@@ -18,7 +18,7 @@ export default function ProtectedRoute({ children }: any) {
       <div>
         <header className="flex justify-between items-center mb-6">
           <div className="text-2xl font-bold text-blue-600">
-            <a href="/">Task Manager</a>
+            <a href="/">TSMK</a>
           </div>
           <div className="flex gap-2">
             {window.location.pathname.includes('/board') &&

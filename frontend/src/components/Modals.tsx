@@ -40,7 +40,7 @@ export function TaskModal({ isOpen, onClose, task }: { isOpen: boolean, onClose:
 export function EditTaskModal({ isOpen, onClose, task }: { isOpen: boolean, onClose: () => void, task: ITask | null, onSave?: (task: ITask) => void }) {
   if (!task) return null
 
-  const { setTasks } = useStoreActions((action) => action);
+  const { setTasks, setRequireSyncing } = useStoreActions((action) => action);
   const { tasks } = useStoreState((state) => state);
   const [editedTask, setEditedTask] = useState<ITask | null>(task);
   const [error, setError] = useState({
@@ -61,6 +61,7 @@ export function EditTaskModal({ isOpen, onClose, task }: { isOpen: boolean, onCl
     if (validateNewTask()) {
       if (editedTask) {
         setTasks(tasks.map(task => task.id === editedTask.id ? { ...task, ...editedTask, updatedAt: new Date().toISOString(), hasChanged: true } : task))
+        setRequireSyncing(true);
       }
       onClose && onClose()
     }
@@ -131,7 +132,7 @@ export function EditTaskModal({ isOpen, onClose, task }: { isOpen: boolean, onCl
 }
 
 export function AddNewTaskModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void, onAdd?: (task: Omit<ITask, 'id' | 'createdAt'>) => void }) {
-  const { setTasks } = useStoreActions((action) => action);
+  const { setTasks, setRequireSyncing } = useStoreActions((action) => action);
   const { tasks, columns } = useStoreState((state) => state);
   const [error, setError] = useState({
     title: '',
@@ -160,6 +161,7 @@ export function AddNewTaskModal({ isOpen, onClose }: { isOpen: boolean, onClose:
 
   const handleAdd = () => {
     if (validateNewTask()) {
+      setRequireSyncing(true);
       setTasks([...tasks, {
         ...newTask,
         id: tasks.length + 1,

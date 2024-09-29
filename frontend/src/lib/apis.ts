@@ -127,7 +127,6 @@ export const getTasksApi = async ({}: { taskId?: string | number, pagination?: {
     }
 
     const data = await resp.json();
-    console.log(data);
     return data;
   } catch (err) {
     console.error(err);
@@ -158,7 +157,7 @@ export const syncTasksApi = async (payload: {
     }
 
     const data = await resp.json();
-    return data as { status: string, lastSuccessfulSyncAt: string, createdTasks: ITask[] };
+    return data as { status: string, lastSuccessfulSyncAt: string, createdTasks: ITask[], allTasks: ITask[] };
   } catch (err) {
     console.error(err);
     throw new Error("Failed to sync tasks");

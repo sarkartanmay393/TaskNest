@@ -11,6 +11,7 @@ import { AddNewTaskModal, EditTaskModal, TaskModal } from "~/components/Modals";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import { Toggle } from "~/components/ui/toggle";
 import { toast } from "~/hooks/use-toast";
+import { Dot } from "lucide-react";
 
 const columns: IColumn[] = [
   {
@@ -47,10 +48,9 @@ const checkDifferences = (storedTasks: ITask[], currentTasks: ITask[]): boolean 
 };
 
 export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: { isAddNewModalOpen: boolean, setIsAddNewModalOpen: any }) {
-  const { tasks, lastSyncStatus, lastSuccessfulSyncAt, isLoading } = useStoreState((state) => state);
-  const { setTasks, setIsLoading, setSyncInfo } = useStoreActions((action) => action);
+  const { tasks, lastSyncStatus, lastSuccessfulSyncAt, isLoading, requireSyncing, searchTerm } = useStoreState((state) => state);
+  const { setTasks, setIsLoading, setSyncInfo, setRequireSyncing, setSearchTerm, performSearch } = useStoreActions((action) => action);
 
-  const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('recent');
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
   const [editingTask, setEditingTask] = useState<ITask | null>(null);
@@ -63,6 +63,11 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
         const { tasks } = await getTasksApi({}) as any;
         setTasks(tasks.map((task: any) => ({ ...task, hasChanged: false })));
       } catch (err) {
+        toast({
+          title: "Database isn't available",
+          description: "Failed to load tasks",
+          duration: 5000,
+        })
         console.log(err);
       } finally {
         setIsLoading(false);
@@ -114,23 +119,26 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
   }
 
   const handleSyncClick = () => {
+    if (!requireSyncing) {
+      return;
+    }
     toast({
       title: "Syncing tasks...",
       description: "Please wait",
       duration: 5000,
     })
-    syncTasksApi({ tasks }).then(({ status, lastSuccessfulSyncAt, createdTasks }) => {
+    syncTasksApi({ tasks }).then(({ status, lastSuccessfulSyncAt, allTasks }) => {
       localStorage.removeItem('syncInfo');
       localStorage.removeItem('tasks');
       setSyncInfo({ status, lastSuccessfulSyncAt });
-      setTasks(tasks.filter((task) => !createdTasks.some((createdTask) => createdTask.id === task.id)).concat(createdTasks).map((task) => ({ ...task, hasChanged: false })));
+      setTasks(allTasks.map((task) => ({ ...task, hasChanged: false })));
       toast({
         title: "Synced successfully",
         description: "Tasks are now synced",
         duration: 5000,
       })
     }).catch((err) => {
-      console.log(err);
+      console.log(err, "err");
       toast({
         title: "Sync failed",
         description: "Please try again",
@@ -155,23 +163,25 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
 
     // Perform the reordering logic here
 
+    setRequireSyncing(true);
     console.log(`From column: ${source.droppableId}, to column: ${destination.droppableId}, draggableId: ${draggableId}`);
   };
 
   return (
     <div className="container mx-auto p-4">
-      <div className="flex justify-between gap-2 items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between gap-2 items-center mb-6">
         <Input
-          type="text"
-          placeholder="Search..."
+          type="search"
+          placeholder="Search tasks"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && performSearch()}
           className="max-w-sm"
           disabled={isLoading}
         />
         <div className="flex gap-4 items-center">
-          <Toggle disabled={isLoading} className="flex gap-1 border" onClick={handleSyncClick}>
-            Last synced at: {lastSyncStatus ? new Date(lastSuccessfulSyncAt).toLocaleString() : 'Never'}
+          <Toggle disabled={isLoading || !requireSyncing} className="flex border" onClick={handleSyncClick}>
+            <Dot className={requireSyncing ? "text-red-500" : "text-green-500"} /> Last synced at: {lastSyncStatus ? new Date(lastSuccessfulSyncAt).toLocaleString() : 'Never'}
           </Toggle>
           <Select value={sortOrder} onValueChange={setSortOrder}>
             <SelectTrigger disabled={isLoading} className="w-[180px]">

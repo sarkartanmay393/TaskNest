@@ -1,4 +1,4 @@
-import { IGlobalStore, ITask, TASK_STATUS } from "../interfaces";
+import { IGlobalStore, ITask } from "../interfaces";
 import { action } from "easy-peasy";
 
 const globalStore: IGlobalStore = {
@@ -11,6 +11,22 @@ const globalStore: IGlobalStore = {
   lastSyncStatus: "success",
   searchTerm: "",
   wholeTaskList: [],
+  requireSyncing: true,
+
+  setRequireSyncing: action((state, payload) => {
+    state.requireSyncing = payload;
+  }),
+
+  performSearch: action((state) => {
+    state.isLoading = true;
+    if (state.searchTerm === "") {
+      state.tasks = state.wholeTaskList;
+      state.isLoading = false;
+      return;
+    }
+    state.tasks = state.wholeTaskList.filter((task) => task.title.toLowerCase().includes(state.searchTerm.toLowerCase()));
+    state.isLoading = false;
+  }),
 
   setSearchTerm: action((state, payload) => {
     state.searchTerm = payload;
@@ -18,12 +34,12 @@ const globalStore: IGlobalStore = {
       state.tasks = state.wholeTaskList;
       return;
     }
-    state.tasks = state.tasks.filter((task) => task.title.toLowerCase().includes(payload.toLowerCase()));
   }),
 
   setSyncInfo: action((state, payload) => {
     state.lastSuccessfulSyncAt = payload.lastSuccessfulSyncAt;
     state.lastSyncStatus = payload.status;
+    state.requireSyncing = false;
     localStorage.setItem('syncInfo', JSON.stringify(payload));
   }),
 
@@ -36,64 +52,10 @@ const globalStore: IGlobalStore = {
     state.wholeTaskList = payload;
   }),
 
-  setTasksByColumn: action((state, payload: { tasks: ITask[]; columnId: number; }) => {
-    const { tasks, columnId } = payload;
-    state.tasks = state.tasks.concat(tasks);
-    state.columns = state.columns.map((column) => {
-      if (column.id === columnId) {
-        return {
-          ...column,
-          tasks: column.tasks.concat(tasks),
-        };
-      }
-      return column;
-    });
-  }),
-
   removeTask: action((state, playload: ITask) => {
     const filteredTasks = state.tasks.filter((task) => task.id !== playload.id);
     state.tasks = filteredTasks;
     state.wholeTaskList = filteredTasks;
-  }),
-
-  changeStatus: action((state, payload: { status: TASK_STATUS; id: number; }) => {
-    state.tasks = state.tasks.map((task) => {
-      if (task.id === payload.id) {
-        return {
-          ...task,
-          status: payload.status,
-        };
-      }
-      return task;
-    });
-
-    let columnId: number;
-    if (payload.status === TASK_STATUS.TODO) {
-      columnId = 1;
-    } else if (payload.status === TASK_STATUS.INPROGRESS) {
-      columnId = 2;
-    } else if (payload.status === TASK_STATUS.COMPLETED) {
-      columnId = 3;
-    }
-
-
-    state.columns = state.columns.map((column) => {
-      if (column.id === columnId) {
-        return {
-          ...column,
-          tasks: column.tasks.map((task) => {
-            if (task.id === payload.id) {
-              return {
-                ...task,
-                status: payload.status,
-              };
-            }
-            return task;
-          }),
-        };
-      }
-      return column;
-    });
   }),
 
   updateTask: action((state, payload: ITask) => {

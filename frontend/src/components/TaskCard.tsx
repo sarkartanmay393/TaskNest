@@ -26,10 +26,10 @@ export default function TaskCard({ data, onClick, onEditClick, index }: TaskProp
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           className="bg-white p-4 rounded-lg shadow cursor-move select-none"
-          style={getItemStyle(
-            snapshot.isDragging,
-            provided.draggableProps.style,
-        )}
+          // style={getItemStyle(
+          //   snapshot.isDragging,
+          //   provided.draggableProps.style
+          // )}
         >
           <h3 className="font-semibold">{data.title}</h3>
           <p className="text-sm text-gray-600">{data.description}</p>
@@ -53,5 +53,5 @@ const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
   background: isDragging ? 'lightgreen' : 'grey',
 
   // styles we need to apply on draggables
-  ...draggableStyle
+  // ...draggableStyle
 });

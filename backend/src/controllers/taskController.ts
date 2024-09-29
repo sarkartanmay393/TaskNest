@@ -132,7 +132,7 @@ const getAllTasks = async (req: ReqType, res: ResType) => {
       });
       return res.json({ tasks, totalTasks: totalTasksCount, start, count });
     } else {
-      const orderBy = sortBy ? { [sortBy]: "desc" } : undefined;
+      // const orderBy = sortBy ? { [sortBy]: "desc" } : undefined;
       const tasks = await prisma.task.findMany({
         where: {
           userId: Number(userid),
@@ -222,7 +222,14 @@ export const bulkUpdateTasks = async (req: ReqType, res: ResType) => {
     const createdTasks = await prisma.task.createMany({
       data: createTasks,
     });
-    return res.json({ createdTasks, updatedTasks, lastSuccessfulSyncAt: new Date().toISOString(), status: "success" });
+
+    const allTasks = await prisma.task.findMany({
+      where: {
+        userId: Number(userid),
+      },
+    });
+    
+    return res.json({ createdTasks, updatedTasks, allTasks, lastSuccessfulSyncAt: new Date().toISOString(), status: "success" });
   } catch (error) {
     console.log(error);
     return res.json({ error: "Failed to update tasks", verbose: JSON.stringify(error), status: "failed", lastSuccessfulSyncAt: new Date("1963-01-01").toISOString() });
