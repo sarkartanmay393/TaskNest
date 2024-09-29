@@ -1,7 +1,6 @@
 import { PlusIcon } from "lucide-react";
 import React, { useEffect } from "react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 import { toast } from "~/hooks/use-toast";
 import { getTasksApi, logoutApi } from "~/lib/apis";
@@ -13,7 +12,6 @@ export default function ProtectedRoute({ children }: any) {
     sessionStorage.clear();
     window.location.href = "/login";
   } else {
-    const navigate = useNavigate();
     const [isAddNewModalOpen, setIsAddNewModalOpen] = useState(false);
     // TODO: making the app offline first
     const { setIsLoading, setTasks } = useStoreActions(action => action);
