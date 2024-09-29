@@ -1,19 +1,39 @@
 import { PlusIcon } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { toast } from "~/hooks/use-toast";
-import { logoutApi } from "~/lib/apis";
+import { getTasksApi, logoutApi } from "~/lib/apis";
+import { useStoreActions } from "~/state/typedHooks";
 
 export default function ProtectedRoute({ children }: any) {
   const accessToken = sessionStorage.getItem("accessToken");
-  const [isAddNewModalOpen, setIsAddNewModalOpen] = useState(false)
-
-
   if (!accessToken || accessToken === "" || accessToken === null || accessToken === "undefined") {
     sessionStorage.clear();
     window.location.href = "/login";
   } else {
+    const [isAddNewModalOpen, setIsAddNewModalOpen] = useState(false)
+    const { setIsLoading, setTasks } = useStoreActions(action => action);
+    useEffect(() => {
+      // Handles loading tasks from the API
+      (async () => {
+        try {
+          setIsLoading(true);
+          const { tasks } = await getTasksApi({}) as any;
+          setTasks(tasks.map((task: any) => ({ ...task, hasChanged: false })));
+        } catch (err) {
+          toast({
+            title: "Database isn't available",
+            description: "Failed to load tasks",
+            duration: 5000,
+          })
+          console.log(err);
+        } finally {
+          setIsLoading(false);
+        }
+      })();
+    }, []);
+
     return (
       <div>
         <header className="flex justify-between items-center mb-6">

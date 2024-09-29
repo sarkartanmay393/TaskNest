@@ -6,6 +6,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { useStoreActions, useStoreState } from "~/state/typedHooks";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { columns } from "~/lib/constants";
 
 export function TaskModal({ isOpen, onClose, task }: { isOpen: boolean, onClose: () => void, task: ITask | null }) {
   if (!task) return null;
@@ -133,7 +134,7 @@ export function EditTaskModal({ isOpen, onClose, task }: { isOpen: boolean, onCl
 
 export function AddNewTaskModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void, onAdd?: (task: Omit<ITask, 'id' | 'createdAt'>) => void }) {
   const { setTasks, setRequireSyncing } = useStoreActions((action) => action);
-  const { tasks, columns } = useStoreState((state) => state);
+  const { tasks } = useStoreState((state) => state);
   const [error, setError] = useState({
     title: '',
     description: ''
@@ -249,15 +250,4 @@ export function Label({ htmlFor, children, className }: { htmlFor: string, child
       {children}
     </label>
   )
-}
-
-const getColumnIdByStatus = (status: string) => {
-  if (status === "TODO") {
-    return 1;
-  } else if (status === "IN_PROGRESS") {
-    return 2;
-  } else if (status === "COMPLETED") {
-    return 3;
-  }
-  return 1;
 }

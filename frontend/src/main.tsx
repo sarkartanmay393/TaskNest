@@ -9,9 +9,9 @@ import { IGlobalStore } from './interfaces'
 const store = createStore<IGlobalStore>(globalStore);
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  // <StrictMode>
     <StoreProvider store={store}>
       <App />
     </StoreProvider>
-  </StrictMode>,
+  // </StrictMode>,
 )

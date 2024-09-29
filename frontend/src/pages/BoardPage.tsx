@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useStoreActions, useStoreState } from "../state/typedHooks";
-import { IColumn, ITask } from "../interfaces";
-import { getTasksApi, syncTasksApi } from "../lib/apis";
+import { ITask } from "../interfaces";
+import { syncTasksApi } from "../lib/apis";
 
 import { Input } from "~/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
@@ -12,68 +12,15 @@ import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import { Toggle } from "~/components/ui/toggle";
 import { toast } from "~/hooks/use-toast";
 import { Dot } from "lucide-react";
-
-const columns: IColumn[] = [
-  {
-    "id": 1,
-    "title": "TODO",
-    tasks: []
-  },
-  {
-    "id": 2,
-    "title": "IN PROGRESS",
-    tasks: []
-  },
-  {
-    "id": 3,
-    "title": "COMPLETED",
-    tasks: []
-  }
-];
-
-const checkDifferences = (storedTasks: ITask[], currentTasks: ITask[]): boolean => {
-  if (storedTasks.length !== currentTasks.length) {
-    return true;
-  }
-
-  const storedTasksMap = new Map(storedTasks.map(task => [task.id, task]));
-  for (const task of currentTasks) {
-    const storedTask = storedTasksMap.get(task.id);
-    if (!storedTask || JSON.stringify(storedTask) !== JSON.stringify(task)) {
-      return true;
-    }
-  }
-
-  return false;
-};
+import { columns } from "~/lib/constants";
+import { checkDifferences } from "~/lib/utils";
 
 export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: { isAddNewModalOpen: boolean, setIsAddNewModalOpen: any }) {
-  const { tasks, lastSyncStatus, lastSuccessfulSyncAt, isLoading, requireSyncing, searchTerm } = useStoreState((state) => state);
-  const { setTasks, setIsLoading, setSyncInfo, setRequireSyncing, setSearchTerm, performSearch } = useStoreActions((action) => action);
+  const { tasks, lastSyncStatus, lastSuccessfulSyncAt, isLoading, requireSyncing, searchTerm, sortBy } = useStoreState((state) => state);
+  const { updateTask, setTasks, setIsLoading, setSyncInfo, setRequireSyncing, setSearchTerm, performSearch, setSortBy } = useStoreActions((action) => action);
 
-  const [sortOrder, setSortOrder] = useState('recent');
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
   const [editingTask, setEditingTask] = useState<ITask | null>(null);
-
-  // Handles loading tasks from the API
-  useEffect(() => {
-    (async () => {
-      try {
-        setIsLoading(true);
-        const { tasks } = await getTasksApi({}) as any;
-        setTasks(tasks.map((task: any) => ({ ...task, hasChanged: false })));
-      } catch (err) {
-        toast({
-          title: "Database isn't available",
-          description: "Failed to load tasks",
-          duration: 5000,
-        })
-        console.log(err);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
 
   // Handles loading tasks from local storage
   useEffect(() => {
@@ -92,36 +39,36 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
   // Handles syncing tasks every 5 minutes
   useEffect(() => {
     const timeout = setTimeout(async () => {
+      if (!requireSyncing) {
+        return;
+      }
       handleSyncClick();
     }, 5 * 60 * 1000);
 
     return () => clearTimeout(timeout);
   }, [])
 
-  const openTaskModal = (task: ITask) => {
+  const openTaskModal = useMemo(() => (task: ITask) => {
     setSelectedTask(task)
-  }
+  }, []);
 
-  const closeTaskModal = () => {
+  const closeTaskModal = useMemo(() => () => {
     setSelectedTask(null)
-  }
+  }, []);
 
-  const openEditModal = (task: ITask) => {
+  const openEditModal = useMemo(() => (task: ITask) => {
     setEditingTask(task)
-  }
+  }, []);
 
-  const closeEditModal = () => {
+  const closeEditModal = useMemo(() => () => {
     setEditingTask(null)
-  }
+  }, []);
 
-  const handleEditTask = () => {
+  const handleEditTask = useMemo(() => () => {  
     closeEditModal()
-  }
+  }, []);
 
-  const handleSyncClick = () => {
-    if (!requireSyncing) {
-      return;
-    }
+  const handleSyncClick = useMemo(() => () => {
     toast({
       title: "Syncing tasks...",
       description: "Please wait",
@@ -147,9 +94,8 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
     }).finally(() => {
       setIsLoading(false);
     });
-  }
+  }, [tasks]);
 
-  // TODO: handle drag and drop
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
 
@@ -157,15 +103,27 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
       return;
     }
 
-    if (destination.droppableId === source.droppableId && destination.index === source.index) {
+    const taskId = Number(draggableId.split('_')[0]);
+    const destinationColumnId = Number(destination.droppableId.split('-')[1]);
+
+    const exactTask = tasks.find((task) => task.id === taskId);
+    if (!exactTask) {
       return;
     }
 
-    // Perform the reordering logic here
-
+    updateTask({ taskId, payload: { columnId: destinationColumnId } });
     setRequireSyncing(true);
-    console.log(`From column: ${source.droppableId}, to column: ${destination.droppableId}, draggableId: ${draggableId}`);
   };
+
+  const DroppableColumns = useMemo(() => (
+    columns.map((column) => (
+      <Column
+        key={column.id}
+        data={column}
+        onTaskClick={openTaskModal}
+        onEditClick={openEditModal}
+      />
+    ))), []);
 
   return (
     <div className="container mx-auto p-4">
@@ -181,30 +139,23 @@ export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: {
         />
         <div className="flex gap-4 items-center">
           <Toggle disabled={isLoading || !requireSyncing} className="flex border" onClick={handleSyncClick}>
-            <Dot className={requireSyncing ? "text-red-500" : "text-green-500"} /> Last synced at: {lastSyncStatus ? new Date(lastSuccessfulSyncAt).toLocaleString() : 'Never'}
+            <Dot className={requireSyncing ? "text-red-500" : "text-green-500"} /> 
+            <span className="whitespace-nowrap">Last synced at: {lastSyncStatus ? new Date(lastSuccessfulSyncAt).toLocaleString('en-US', { hour12: true, timeStyle: 'short' }) : 'Never'}</span>
           </Toggle>
-          <Select value={sortOrder} onValueChange={setSortOrder}>
+          <Select value={sortBy} onValueChange={(val) => setSortBy(val)}>
             <SelectTrigger disabled={isLoading} className="w-[180px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="recent">Most Recent</SelectItem>
-              <SelectItem value="oldest">Oldest</SelectItem>
+              <SelectItem value="updatedAt">Most Recent</SelectItem>
+              <SelectItem value="createdAt">Oldest</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full h-full">
         <DragDropContext onDragEnd={handleDragEnd}>
-          {columns.map((column) => (
-            <Column
-              key={column.id}
-              data={column}
-              onTaskClick={openTaskModal}
-              onEditClick={openEditModal}
-              globalIsLoading={isLoading}
-            />
-          ))}
+          {DroppableColumns}
         </DragDropContext>
       </div>
       <TaskModal isOpen={!!selectedTask} onClose={closeTaskModal} task={selectedTask} />

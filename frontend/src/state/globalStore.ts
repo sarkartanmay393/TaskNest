@@ -5,7 +5,6 @@ const globalStore: IGlobalStore = {
   isLoading: true,
   error: "",
   tasks: [],
-  columns: [],
   sortBy: "updatedAt",
   lastSuccessfulSyncAt: "",
   lastSyncStatus: "success",
@@ -56,12 +55,17 @@ const globalStore: IGlobalStore = {
     const filteredTasks = state.tasks.filter((task) => task.id !== playload.id);
     state.tasks = filteredTasks;
     state.wholeTaskList = filteredTasks;
+    state.requireSyncing = true;
   }),
 
-  updateTask: action((state, payload: ITask) => {
+  updateTask: action((state, payload: { taskId: string | number, payload: Partial<ITask> }) => {
     state.tasks = state.tasks.map((task) => {
-      if (task.id === payload.id) {
-        return payload;
+      if (task.id === payload.taskId) {
+        state.requireSyncing = true;
+        return {
+          ...task,
+          ...payload.payload,
+        };
       }
       return task;
     });
@@ -74,10 +78,6 @@ const globalStore: IGlobalStore = {
   setSortBy: action((state, payload) => {
     state.sortBy = payload;
   }),
-
-  setColumns: action((state, payload) => {
-    state.columns = payload;
-  })
 };
 
 export default globalStore;

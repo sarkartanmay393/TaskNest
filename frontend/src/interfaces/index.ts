@@ -48,7 +48,6 @@ export interface IGlobalStore {
   isLoading: boolean;
   error: string;
   tasks: ITask[];
-  columns: IColumn[];
   sortBy: string;
   lastSuccessfulSyncAt: string;
   lastSyncStatus: string;
@@ -63,12 +62,10 @@ export interface IGlobalStore {
   setError: Action<IGlobalStore, string>;
   setTasks: Action<IGlobalStore, ITask[]>;
   setSortBy: Action<IGlobalStore, string>;
-  setColumns: Action<IGlobalStore, IColumn[]>;
 
   // Task management
-  // addTask: Action<IGlobalStore, ITask>;
   removeTask: Action<IGlobalStore, ITask>;
-  updateTask: Action<IGlobalStore, ITask>;
+  updateTask: Action<IGlobalStore, { taskId: string | number, payload: Partial<ITask> }>;
   performSearch: Action<IGlobalStore>;
 
   //  utils
