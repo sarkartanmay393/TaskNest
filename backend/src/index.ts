@@ -33,7 +33,7 @@ const app = express();
 // Middlewares
 app.use(
   cors.default({
-    origin: ["http://localhost:5173", "https://tsmk-voosho.vercel.app"],
+    origin: ["http://localhost:5173", "https://tsmk-voosho.vercel.app", "https://tsmk-dnd.vercel.app"],
     credentials: true,
   })
 );
