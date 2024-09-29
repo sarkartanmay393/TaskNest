@@ -89,6 +89,13 @@ export default function LoginPage() {
     }
   }
 
+  const handleGuestLogin = async () => {
+    onSubmit({
+      email: "guest@ytsmk.co",
+      password: "guest123",
+    });
+  }
+
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md border-2 border-blue-500">
@@ -134,7 +141,10 @@ export default function LoginPage() {
             </a>
           </p>
         </div>
-        <div className="mt-4">
+        <div className="mt-4 space-y-2">
+          <Button onClick={handleGuestLogin} variant="secondary" className="w-full border border-blue-500 hover:bg-blue-50 text-gray-600">
+            Guest Login
+          </Button>
           <Button onClick={handleGoogleLogin} variant="outline" className="w-full border-blue-500 text-blue-500 hover:bg-blue-50">
             <img src="https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000" alt="google logo" className="w-4 h-4 mr-2" />
             Login with Google
