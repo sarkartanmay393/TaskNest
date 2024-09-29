@@ -28,7 +28,7 @@ const createTask = async (req: ReqType, res: ResType) => {
 
 const updateTask = async (req: ReqType, res: ResType) => {
   const { userid } = req.headers as { userid: string };
-  const { id }  = req.params as unknown as { id: string };
+  const { id } = req.params as unknown as { id: string };
   const { columnId, description, title } = req.body;
 
   try {
@@ -57,7 +57,7 @@ const deleteTask = async (req: ReqType, res: ResType) => {
   try {
     const deletedTask = await prisma.task.delete({
       where: {
-        id: Number(id), 
+        id: Number(id),
         userId: Number(userid),
       }
     });
@@ -172,16 +172,23 @@ const getAllTasks = async (req: ReqType, res: ResType) => {
 
 export const bulkUpdateTasks = async (req: ReqType, res: ResType) => {
   const { userid } = req.headers as { userid: string };
-  const { tasks = [] } = req.body as unknown as { tasks: any[] };
+  const tasks = req.body as unknown as {
+      id: number;
+      title: string;
+      description: string;
+      columnId: number;
+      createdAt: string;
+      updatedAt: string;
+      new: boolean | undefined;
+  }[];
 
   try {
     const createTasks: any[] = [];
     const updateTasks: any[] = [];
 
     for (const task of tasks) {
-      if (task.id) {
-        updateTasks.push({
-          id: Number(task.id),
+      if (task.new) {
+        createTasks.push({
           title: task.title,
           description: task.description,
           columnId: Number(task.columnId),
@@ -190,23 +197,29 @@ export const bulkUpdateTasks = async (req: ReqType, res: ResType) => {
           userId: Number(userid),
         });
       } else {
-        createTasks.push({
-            title: task.title,
-            description: task.description,
-            columnId: Number(task.columnId),
-            createdAt: new Date(task.createdAt),
-            updatedAt: new Date(task.updatedAt),
-            userId: Number(userid),
+        updateTasks.push({
+          id: Number(task.id),
+          title: task.title,
+          description: task.description,
+          columnId: Number(task.columnId),
+          updatedAt: new Date(task.updatedAt),
         });
       }
     }
 
-    const updatedTasks = await prisma.task.updateMany({
-      where: { id: { in: updateTasks.map((task) => task.id) } },
-      data: updateTask,
-    });
-    
-    const createdTasks = await prisma.task.createManyAndReturn({
+    const updatedTasks = await Promise.all(updateTasks.map(async (task) => {
+      return await prisma.task.update({
+        where: { id: task.id },
+        data: {
+          title: task.title,
+          description: task.description,
+          columnId: task.columnId,
+          updatedAt: task.updatedAt,
+        },
+      });
+    }));
+
+    const createdTasks = await prisma.task.createMany({
       data: createTasks,
     });
     return res.json({ createdTasks, updatedTasks, lastSuccessfulSyncAt: new Date().toISOString(), status: "success" });

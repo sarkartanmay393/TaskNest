@@ -14,9 +14,9 @@ const logOut = async (req: ReqType, res: ResType) => {
   try {
     res.clearCookie("token");
     console.log(`Logout successful!`);
-    return res.json(`Come back soon!`);
+    return res.json({ message: "Come back soon!", status: "success" });
   } catch (error) {
-    return res.status(401).json(`${error}`);
+    return res.status(401).json({ error: `${error}`, status: "failed" });
   }
 };
 

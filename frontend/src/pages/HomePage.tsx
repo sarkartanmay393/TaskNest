@@ -2,9 +2,9 @@ import { Button } from "~/components/ui/button";
 
 export default function HomePage() {
   return (
-    <div className="min-h-[50vh] bg-gradient-to-b from-blue-100 to-white flex flex-col items-center justify-center p-4">
+    <div className="border min-h-[calc(100vh-100px)] radius-lg bg-gradient-to-b from-blue-100 to-white flex flex-col items-center justify-center p-4">
       <div className="max-w-2xl w-full text-center">
-        <h1 className="text-4xl font-bold text-blue-600 mb-4">
+        <h1 className="text-4xl font-bold text-blue-600 mb-2">
           Welcome to Voosho Task Manager
         </h1>
         <p className="text-xl text-gray-600 mb-8">

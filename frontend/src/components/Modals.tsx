@@ -1,7 +1,7 @@
-import { type ITask, TASK_STATUS } from "~/interfaces"
+import { type ITask } from "~/interfaces"
 import { Button } from "./ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "./ui/dialog"
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { useStoreActions, useStoreState } from "~/state/typedHooks";
@@ -105,24 +105,19 @@ export function EditTaskModal({ isOpen, onClose, task }: { isOpen: boolean, onCl
             </Label>
             <Select
               required
-              value={editedTask?.status?.toString()}
-              onValueChange={(value: "TOOD" | "IN_PROGRESS" | "COMPLETED") => setEditedTask((p) => ({
+              value={editedTask?.columnId?.toString()}
+              onValueChange={(value) => setEditedTask((p) => ({
                 ...p!,
-                status: value === 'COMPLETED' ?
-                  TASK_STATUS.COMPLETED :
-                  value === 'IN_PROGRESS' ?
-                    TASK_STATUS.INPROGRESS :
-                    TASK_STATUS.TODO,
-                columnId: getColumnIdByStatus(value)
+                columnId: Number(value)
               }))}
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="TODO">TODO</SelectItem>
-                <SelectItem value="IN_PROGRESS">IN PROGRESS</SelectItem>
-                <SelectItem value="COMPLETED">COMPLETED</SelectItem>
+                <SelectItem value="1">TODO</SelectItem>
+                <SelectItem value="2">IN PROGRESS</SelectItem>
+                <SelectItem value="3">COMPLETED</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -146,23 +141,18 @@ export function AddNewTaskModal({ isOpen, onClose }: { isOpen: boolean, onClose:
   const [newTask, setNewTask] = useState<Omit<ITask, 'id' | 'createdAt' | 'updatedAt'>>({
     title: '',
     description: '',
-    status: TASK_STATUS.TODO,
     columnId: 1,
     userId: JSON.parse(sessionStorage.getItem("user") ?? '').id,
     column: columns.find((column) => column.id === 1)!,
     user: undefined,
-    hasChanged: true
+    hasChanged: true,
+    new: true,
   })
 
   const validateNewTask = () => {
     if (newTask.title.trim() === '') {
       setError((p) => ({ ...p, title: 'Title is required' }));
       document.getElementById('new-title')!.focus();
-      return false;
-    }
-    if (newTask.description.trim() === '') {
-      setError((p) => ({ ...p, description: 'Description is required' }));
-      document.getElementById('new-description')!.focus();
       return false;
     }
     return true;
@@ -229,16 +219,16 @@ export function AddNewTaskModal({ isOpen, onClose }: { isOpen: boolean, onClose:
             <Select
               name="new-status"
               required
-              value={newTask.status}
-              onValueChange={(value: "TOOD" | "IN PROGRESS" | "COMPLETED") => setNewTask({ ...newTask, status: value === 'COMPLETED' ? TASK_STATUS.COMPLETED : value === 'IN PROGRESS' ? TASK_STATUS.INPROGRESS : TASK_STATUS.TODO, columnId: getColumnIdByStatus(value) })}
+              value={newTask.columnId.toString()}
+              onValueChange={(value) => setNewTask({ ...newTask, columnId: Number(value) })}
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="TODO">TODO</SelectItem>
-                <SelectItem value="IN PROGRESS">IN PROGRESS</SelectItem>
-                <SelectItem value="COMPLETED">COMPLETED</SelectItem>
+                <SelectItem value={"1"}>TODO</SelectItem>
+                <SelectItem value={"2"}>IN PROGRESS</SelectItem>
+                <SelectItem value={"3"}>COMPLETED</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -32,8 +32,8 @@ export interface ITask {
   user: unknown;
   createdAt: string;
   updatedAt: string;
-  status?: TASK_STATUS;
   hasChanged?: boolean;
+  new?: boolean;
 }
 
 export interface IColumn {

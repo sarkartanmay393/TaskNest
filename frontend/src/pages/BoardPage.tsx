@@ -4,13 +4,13 @@ import { useStoreActions, useStoreState } from "../state/typedHooks";
 import { IColumn, ITask } from "../interfaces";
 import { getTasksApi, syncTasksApi } from "../lib/apis";
 
-import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
-import { PlusIcon } from 'lucide-react'
 import Column from "~/components/Column";
 import { AddNewTaskModal, EditTaskModal, TaskModal } from "~/components/Modals";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
+import { Toggle } from "~/components/ui/toggle";
+import { toast } from "~/hooks/use-toast";
 
 const columns: IColumn[] = [
   {
@@ -30,23 +30,38 @@ const columns: IColumn[] = [
   }
 ];
 
-export default function BoardPage() {
-  const { tasks } = useStoreState((state) => state);
-  const { setTasks, setIsLoading } =
+const checkDifferences = (storedTasks: ITask[], currentTasks: ITask[]): boolean => {
+  if (storedTasks.length !== currentTasks.length) {
+    return true;
+  }
+
+  const storedTasksMap = new Map(storedTasks.map(task => [task.id, task]));
+  for (const task of currentTasks) {
+    const storedTask = storedTasksMap.get(task.id);
+    if (!storedTask || JSON.stringify(storedTask) !== JSON.stringify(task)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+export default function BoardPage({ isAddNewModalOpen, setIsAddNewModalOpen }: { isAddNewModalOpen: boolean, setIsAddNewModalOpen: any }) {
+  const { tasks, lastSyncStatus, lastSuccessfulSyncAt, isLoading } = useStoreState((state) => state);
+  const { setTasks, setIsLoading, setSyncInfo } =
     useStoreActions((action) => action);
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [sortOrder, setSortOrder] = useState('recent');
-    const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
-    const [editingTask, setEditingTask] = useState<ITask | null>(null);
-    const [isAddNewModalOpen, setIsAddNewModalOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState('recent');
+  const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
+  const [editingTask, setEditingTask] = useState<ITask | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
         setIsLoading(true);
         const { tasks } = await getTasksApi({}) as any;
-        setTasks(tasks);
+        setTasks(tasks.map((task: any) => ({ ...task, hasChanged: false })));
       } catch (err) {
         console.log(err);
       } finally {
@@ -56,11 +71,27 @@ export default function BoardPage() {
   }, []);
 
   useEffect(() => {
-    const timeout = setTimeout(async() => {
-     const { status, lastSyncAt, createdTasks } = await syncTasksApi({ tasks });
-     console.log({ status, lastSyncAt, createdTasks });
-     setTasks(tasks.filter((task) => !createdTasks.some((createdTask) => createdTask.id === task.id)).concat(createdTasks));
-    }, 5000);
+    const tasksLS = localStorage.getItem('tasks');
+    if (tasksLS && tasksLS !== '[]' && tasksLS !== "undefined" && tasksLS !== null) {
+      const tasksLSParsed = JSON.parse(tasksLS);
+      if (checkDifferences(tasksLSParsed, tasks)) {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+      }
+    } else {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+    console.log('tasks saved on local storage');
+  }, [tasks]);
+
+  useEffect(() => {
+    const timeout = setTimeout(async () => {
+      const { status, lastSuccessfulSyncAt, createdTasks } = await syncTasksApi({ tasks });
+      console.log({ status, lastSuccessfulSyncAt, createdTasks });
+      localStorage.removeItem('syncInfo');
+      localStorage.removeItem('tasks');
+      setSyncInfo({ status, lastSuccessfulSyncAt });
+      setTasks(tasks.filter((task) => !createdTasks.some((createdTask) => createdTask.id === task.id)).concat(createdTasks).map((task) => ({ ...task, hasChanged: false })));
+    }, 5 * 60 * 1000);
 
     return () => clearTimeout(timeout);
   }, [])
@@ -83,34 +114,55 @@ export default function BoardPage() {
   }
 
   const handleEditTask = () => {
-    // setTasks(tasks.map(task => task.id === updatedTask.id ? updatedTask : task))
     closeEditModal()
   }
 
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
-  
+
     if (!destination) {
       return;
     }
-  
+
     if (destination.droppableId === source.droppableId && destination.index === source.index) {
       return;
     }
-  
+
     // Perform the reordering logic here
-  
+
     console.log(`From column: ${source.droppableId}, to column: ${destination.droppableId}, draggableId: ${draggableId}`);
   };
-  
+
+  const handleSyncClick = () => {
+    toast({
+      title: "Syncing tasks...",
+      description: "Please wait",
+      duration: 5000,
+    })
+    syncTasksApi({ tasks }).then(({ status, lastSuccessfulSyncAt, createdTasks }) => {
+      localStorage.removeItem('syncInfo');
+      localStorage.removeItem('tasks');
+      setSyncInfo({ status, lastSuccessfulSyncAt });
+      setTasks(tasks.filter((task) => !createdTasks.some((createdTask) => createdTask.id === task.id)).concat(createdTasks).map((task) => ({ ...task, hasChanged: false })));
+      toast({
+        title: "Synced successfully",
+        description: "Tasks are now synced",
+        duration: 5000,
+      })
+    }).catch((err) => {
+      console.log(err);
+      toast({
+        title: "Sync failed",
+        description: "Please try again",
+        duration: 5000,
+      })
+    }).finally(() => {
+      setIsLoading(false);
+    });
+  }
+
   return (
     <div className="container mx-auto p-4">
-      <header className="flex justify-between items-center mb-6">
-        <div className="text-2xl font-bold text-blue-600">Task Manager</div>
-        <Button onClick={() => setIsAddNewModalOpen(true)} className="bg-blue-500 hover:bg-blue-600">
-          <PlusIcon className="mr-2 h-4 w-4" /> Add New
-        </Button>
-      </header>
       <div className="flex justify-between gap-2 items-center mb-6">
         <Input
           type="text"
@@ -118,16 +170,22 @@ export default function BoardPage() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
+          disabled={isLoading}
         />
-        <Select value={sortOrder} onValueChange={setSortOrder}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="recent">Most Recent</SelectItem>
-            <SelectItem value="oldest">Oldest</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex gap-4 items-center">
+          <Toggle disabled={isLoading} className="flex gap-1 border" onClick={handleSyncClick}>
+            Last synced at: {lastSyncStatus ? new Date(lastSuccessfulSyncAt).toLocaleString() : 'Never'}
+          </Toggle>
+          <Select value={sortOrder} onValueChange={setSortOrder}>
+            <SelectTrigger disabled={isLoading} className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Most Recent</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full h-full">
         <DragDropContext onDragEnd={handleDragEnd}>
@@ -137,6 +195,7 @@ export default function BoardPage() {
               data={column}
               onTaskClick={openTaskModal}
               onEditClick={openEditModal}
+              globalIsLoading={isLoading}
             />
           ))}
         </DragDropContext>

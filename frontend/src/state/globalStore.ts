@@ -13,6 +13,7 @@ const globalStore: IGlobalStore = {
   setSyncInfo: action((state, payload) => {
     state.lastSuccessfulSyncAt = payload.lastSuccessfulSyncAt;
     state.lastSyncStatus = payload.status;
+    localStorage.setItem('syncInfo', JSON.stringify(payload));
   }),
 
   setIsLoading: action((state, payload) => {
@@ -21,26 +22,6 @@ const globalStore: IGlobalStore = {
 
   setTasks: action((state, payload: ITask[]) => {
     state.tasks = payload;
-    const c1Tasks = payload.filter((task) => task.columnId === 1);
-    const c2Tasks = payload.filter((task) => task.columnId === 2);
-    const c3Tasks = payload.filter((task) => task.columnId === 3);
-    state.columns = [
-      {
-        id: 1,
-        title: "TODO",
-        tasks: c1Tasks,
-      },
-      {
-        id: 2,
-        title: "IN PROGRESS",
-        tasks: c2Tasks,
-      },
-      {
-        id: 3,
-        title: "COMPLETED",
-        tasks: c3Tasks,
-      },
-    ];
   }),
 
   setTasksByColumn: action((state, payload: { tasks: ITask[]; columnId: number; }) => {
@@ -59,14 +40,7 @@ const globalStore: IGlobalStore = {
 
   removeTask: action((state, playload: ITask) => {
     const filteredTasks = state.tasks.filter((task) => task.id !== playload.id);
-    const filteredColumns = state.columns.map((column) => {
-      return {
-        ...column,
-        tasks: column.tasks.filter((task) => task.id !== playload.id),
-      };
-    });
     state.tasks = filteredTasks;
-    state.columns = filteredColumns;
   }),
 
   changeStatus: action((state, payload: { status: TASK_STATUS; id: number; }) => {

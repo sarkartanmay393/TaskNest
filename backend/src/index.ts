@@ -6,11 +6,17 @@ import express from "express";
 import cookie from "cookie-parser";
 import rateLimit from 'express-rate-limit';
 
-import { createTask, deleteTask, updateTask, getAllTasks, bulkUpdateTasks } from "./controllers/taskController";
+import {
+  createTask,
+  deleteTask,
+  updateTask,
+  getAllTasks,
+  bulkUpdateTasks
+} from "./controllers/taskController";
 import connectDatabase from "./utils/connectDatabase";
 import { createUser, loginUser, logOut } from "./controllers/authController";
-import { catchGlobalErrors } from "./middlewares/catchGlobalErrors";
-import { catchAllMiddleware } from "./middlewares/catchAllMiddleware";
+// import { catchGlobalErrors } from "./middlewares/catchGlobalErrors";
+// import { catchAllMiddleware } from "./middlewares/catchAllMiddleware";
 import authMiddleware from "./middlewares/authMiddleware";
 
 const PORT = process.env.PORT || 8080;
@@ -42,7 +48,6 @@ app.get('/', (_, res) => {
 // Authentication
 app.post("/v1/api/signup", createUser);
 app.post("/v1/api/login", loginUser);
-
 app.get("/v1/api/logout", authMiddleware, logOut);
 
 // Task Management

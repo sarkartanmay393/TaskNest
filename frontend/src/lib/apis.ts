@@ -3,6 +3,23 @@ import { headers } from "../worker/WebWorker";
 import { baseUrl } from "./network";
 import { LoginPayload, SignUpPayload } from "./types";
 
+export const logoutApi = async () => {
+  try {
+    const resp = await fetch(baseUrl + "/api/logout", {
+      method: "GET",
+      headers: headers,
+      credentials: "include",
+    });
+    if (resp.status !== 200) {
+      throw new Error("Failed to logout");
+    }
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+
 export const signUpApi = async (payload: SignUpPayload) => {
   try {
     const { user, token, error } = await fetch(baseUrl + "/api/signup", {
@@ -121,18 +138,27 @@ export const syncTasksApi = async (payload: {
   tasks: ITask[];
 }) => {
   try {
+    const formattedTasks = payload.tasks.filter((task => task.new || task.hasChanged)).map((task) => ({
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      columnId: task.columnId,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+      new: task.new,
+    }));
     const resp = await fetch(baseUrl + "/api/task/bulkUpdate", {
       method: "POST",
       headers: headers,
       credentials: "include",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(formattedTasks),
     });
     if (resp.status !== 200) {
       throw new Error("Failed to sync tasks");
     }
 
     const data = await resp.json();
-    return data as { status: string, lastSyncAt: any, createdTasks: ITask[] };
+    return data as { status: string, lastSuccessfulSyncAt: string, createdTasks: ITask[] };
   } catch (err) {
     console.error(err);
     throw new Error("Failed to sync tasks");
