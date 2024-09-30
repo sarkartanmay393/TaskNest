@@ -21,7 +21,14 @@ export default function Column({
 
   const currentTasks = useMemo(() => {
     setIsLoading(true);
-    const calcTasks = tasks.filter((task) => task.columnId === data.id && task.isDeleted !== true);
+    const calcTasks = tasks.filter((task) => task.columnId === data.id && task.isDeleted !== true).sort((a, b) => {
+      if (sortBy === "updatedAt") {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      } else {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      }
+      return 0;
+    });
     setIsLoading(false);
     return calcTasks;
   }, [tasks, data.id, sortBy]);
@@ -36,6 +43,8 @@ export default function Column({
         onEditClick={() => onEditClick(task)}
       />
     )), [currentTasks]);
+
+    console.log(currentTasks);
 
   return (
     <Droppable droppableId={`column-${data.id}`} type="COLUMN">

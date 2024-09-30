@@ -30,7 +30,7 @@ export function TaskModal({ isOpen, onClose, task }: { isOpen: boolean, onClose:
         <DialogFooter>
           <div className="w-full flex justify-between items-end">
             <p className="text-xs text-gray-500">Updated at: {new Date(task.updatedAt).toLocaleString('en-US', { timeStyle: 'short', dateStyle: 'short' })}</p>
-            <Button onClick={onClose}>Close</Button>
+            <Button onClick={onClose} className="bg-blue-500 hover:bg-blue-600">Close</Button>
           </div>
         </DialogFooter>
       </DialogContent>
@@ -72,7 +72,7 @@ export function EditTaskModal({ isOpen, onClose, task }: { isOpen: boolean, onCl
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="rounded-lg max-w-[320px] sm:max-w-[425px] lg:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Edit ITask</DialogTitle>
+          <DialogTitle>Edit Task</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -125,7 +125,7 @@ export function EditTaskModal({ isOpen, onClose, task }: { isOpen: boolean, onCl
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleSave}>Save changes</Button>
+          <Button onClick={handleSave} className="bg-blue-500 hover:bg-blue-600">Save changes</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
