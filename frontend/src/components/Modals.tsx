@@ -70,7 +70,7 @@ export function EditTaskModal({ isOpen, onClose, task }: { isOpen: boolean, onCl
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="rounded-lg max-w-[320px] sm:max-w-[425px] lg:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Edit ITask</DialogTitle>
         </DialogHeader>
@@ -181,7 +181,7 @@ export function AddNewTaskModal({ isOpen, onClose }: { isOpen: boolean, onClose:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="rounded-lg max-w-[320px] sm:max-w-[425px] lg:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Add New ITask</DialogTitle>
         </DialogHeader>
