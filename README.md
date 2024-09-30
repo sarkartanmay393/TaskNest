@@ -5,34 +5,32 @@
 <div align="center">
 
   <a href="https://github.com/sarkartanmay393/tsmk-dnd">
-    <img src="./frontend/public/logo.png" alt="Logo" width="125" height="125">
+    <img src="./frontend/public/logo.png" alt="Logo" width="92" height="92">
   </a>
 
 <h3 align="center">TSMK - Kanban Board</h3>
 
-[![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 <p align="center">
-   Contains a task management dashboard with useful features including drag-and-drop.
+  A task management dashboard with useful features including drag-and-drop.
    <br />
-   <a href="https://github.com/sarkartanmay393/
-tsmk"><strong>Explore Code »</strong></a>
+   <a href="https://github.com/sarkartanmay393/tsmk-dnd"><strong>Explore Code »</strong></a>
    <br />
    <br />
-   <a href="https://taskmanagerkb.onrender.com/" target="_blank" rel="noopener noreferrer" >View Demo</a>
+   <a href="https://tsmk-dnd.vercel.app" target="_blank" rel="noopener noreferrer" >View Demo</a>
    ·
-   <a href="https://github.com/sarkartanmay393/tsmk-dnd/
-issues">Report Bug</a>
+   <a href="https://github.com/sarkartanmay393/tsmk-dnd/issues">Report Bug</a>
    ·
    <a href="https://github.com/sarkartanmay393/tsmk-dnd/
 issues">Request Feature</a>
  </p>
-
 </div>
+
+TSMK-DND is a web application that allows users to manage their tasks and projects. The application provides a simple and intuitive interface for creating, organizing, and tracking tasks.
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -41,16 +39,16 @@ issues">Request Feature</a>
     <li>
       <a href="#about-the-project">About The Project</a>
       <ul>
-        <li><a href="#built-with">Built With</a></li>
+        <li><a href="#features">Feautures</a></li>
       </ul>
       <ul>
-        <li><a href="#things-i-learned">Things I Learned</a></li>
+        <li><a href="#technologies-i-used">Technologies I Used</a></li>
       </ul>
       <ul>
-        <li><a href="#packages-i-used">Packages I Used</a></li>
+        <li><a href="#folder-structure">Folder Structure</a></li>
       </ul>
       <ul>
-        <li><a href=“#screenshots">Screenshots</a></li>
+        <li><a href="#screenshots">Screenshots</a></li>
       </ul>
     </li>
     <li>
@@ -60,7 +58,6 @@ issues">Request Feature</a>
         <li><a href="#steps-to-run">Steps to run</a></li>
       </ul>
     </li>
-    <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#contact">Contact</a></li>
   </ol>
@@ -70,27 +67,37 @@ issues">Request Feature</a>
 
 ## About The Project
 
-<!-- ### Built With
+### Features
 
-- [![Docker][Docker.com]][Docker-url] -->
+- Create and manage tasks.
+- Local storage for tasks.
+- Drag and drop functionality for tasks.
+- Search functionality for tasks.
+- Filter functionality for tasks.
 
-### Things I Learned
+### Technologies Used
 
-1. Everything of Basic Web App.
+- **Backend**: Node.js, Express.js
+- **Frontend**: React.js, Vite.js, Tailwind CSS, Shadcn UI
+- **Database**: PostgreSQL with Prisma
 
-### Packages I Used
+## Folder Structure
 
+The project follows a structured organization with separate backend and frontend directories:
 
-### Screenshots
+- `backend/`: Contains the Node.js backend.
+- `frontend/`: Contains the React frontend.
 
-~none
+<!-- ### Packages I Used
 
-<!-- <details>
-   <summary><strong>Show</strong> </summary>
+1. "tailwindcss"
+2. "vite"
+3. "jest"
+4. "nodemon"
+5. "supertest"
+6. "lucid-react"
+7. "shadcn/ui" -->
 
-<div style="text-align: center;"> <strong><i>Highland Room Outlook</i></strong></div>
-
-![Hinghland Rooms](static/screenshots/highend-room-page.png "Highend Room Page") -->
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -103,49 +110,45 @@ Running a development environment for this project will be the easiest thing in 
 ### Prerequisites
 
 - [**Node**](https://nodejs.org/en/)
-- [**Docker**](https://www.docker.com) (Optional)
 
 ### Steps to run
 
-- Clone the repository
+To run the application locally, follow these steps:
 
-  ```zsh
-  git clone https://github.com/sarkartanmay393/tsmk-dnd.git
-  ```
+1. Clone the repository:
 
-- Run the following command to start everything using Docker
+   ```bash
+   git clone https://github.com/sarkartanmay393/tsmk-dnd.git
+   ```
 
-  ```zsh
+2. Run both command separately to setup the codebase:
+
+   ```bash
+   cd backend && npm install && npm run dev
+   ```
+
+   ```bash
+   cd frontend && npm install && npm run dev
+   ```
+
+- or Use Docker Compose
+
+  ```bash
   docker compose up
   ```
 
-  OR
-
-- Run the following command to start using `concurrently`
+- or Run the following command to start using `concurrently`
 
   ```zsh
   chmod +x start.sh
-  npm install -g concurrently
   /.start.sh
   ```
 
 <br />
 
-> If any issue occured while running the server, just delete the roomreservation image from docker and start the compose again.
+> If any issue occured ...
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- ROADMAP -->
-
-## Roadmap
-
-- [x] Web Application
-- [x] Styling w/ Tailwind
-- [x] Database
-- [x] New Responsive UI
-- [ ] Real Project Transformation
-
-See the [open issues](https://github.com/sarkartanmay393/tsmk-dnd/issues) for a full list of proposed features (and known issues).
 
 <!-- CONTRIBUTING -->
 
@@ -163,11 +166,13 @@ Don't forget to give the project a star! Thanks again!
 5. Open a Pull Request
 6. Wait for review
 
+See the [open issues](https://github.com/sarkartanmay393/tsmk-dnd/issues) for a full list of proposed features (and known issues).
+
 <!-- CONTACT -->
 
 ## Contact
 
-Your Name - Tanmay Sarkar [@sarkartanmay393](https://twitter.com/sarkartanmay393) - [hello@tanmaysarkar.tech](mailto:hello@tanmaysarkar.tech)
+Your Name - Tanmay Sarkar [@sarkartanmay393](https://twitter.com/sarkartanmay393) - [sarkartanmay393@gmail.com](mailto:sarkartanmay393@gmail.com)
 
 Project Link: [https://github.com/sarkartanmay393/tsmk-dnd](https://github.com/sarkartanmay393/tsmk-dnd)
 
@@ -178,19 +183,17 @@ Project Link: [https://github.com/sarkartanmay393/tsmk-dnd](https://github.com/s
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[contributors-shield]: https://img.shields.io/github/contributors/sarkartanmay393/tsmk.svg?style=for-the-badge
-[contributors-url]: https://github.com/sarkartanmay393/tsmk-dnd/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/sarkartanmay393/tsmk.svg?style=for-the-badge
+[forks-shield]: https://img.shields.io/github/forks/sarkartanmay393/CryptoConvert.svg?style=for-the-badge
 [forks-url]: https://github.com/sarkartanmay393/tsmk-dnd/network/members
-[stars-shield]: https://img.shields.io/github/stars/sarkartanmay393/tsmk.svg?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/sarkartanmay393/CryptoConvert.svg?style=for-the-badge
 [stars-url]: https://github.com/sarkartanmay393/tsmk-dnd/stargazers
-[issues-shield]: https://img.shields.io/github/issues/sarkartanmay393/tsmk.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/sarkartanmay393/CryptoConvert.svg?style=for-the-badge
 [issues-url]: https://github.com/sarkartanmay393/tsmk-dnd/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/tanmaysrkr
-[Docker.com]: https://img.shields.io/badge/Docker-2496ed?style=for-the-badge&logo=docker&logoColor=white
-[Docker-url]: https://www.docker.com/
-[PostgreSQL.com]: https://img.shields.io/badge/PostgreSQL-4169e1?style=for-the-badge&logo=postgresql&logoColor=white
-[PostgreSQL-url]: https://www.postgresql.org/
-[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
-[Bootstrap-url]: https://getbootstrap.com
+[React.dev]: https://img.shields.io/badge/React-2496ed?style=for-the-badge&logo=react&logoColor=white
+[React-url]: https://www.docker.com/
+[Express.com]: https://img.shields.io/badge/Express-2496ed?style=for-the-badge&logo=express&logoColor=white
+[Express-url]: https://www.docker.com/
+[Node.com]: https://img.shields.io/badge/Nodejs-2496ed?style=for-the-badge&logo=nodejs&logoColor=white
+[Node-url]: https://www.docker.com/
