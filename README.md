@@ -4,7 +4,7 @@
 <br />
 <div align="center">
 
-  <a href="https://github.com/sarkartanmay393/tsmk-dnd">
+  <a href="https://github.com/sarkartanmay393/TaskNest">
     <img src="./frontend/public/logo.png" alt="Logo" width="92" height="92">
   </a>
 
@@ -18,19 +18,19 @@
 <p align="center">
   A task management dashboard with useful features including drag-and-drop.
    <br />
-   <a href="https://github.com/sarkartanmay393/tsmk-dnd"><strong>Explore Code »</strong></a>
+   <a href="https://github.com/sarkartanmay393/TaskNest"><strong>Explore Code »</strong></a>
    <br />
    <br />
-   <a href="https://tsmk-dnd.vercel.app" target="_blank" rel="noopener noreferrer" >View Demo</a>
+   <a href="https://TaskNest.vercel.app" target="_blank" rel="noopener noreferrer" >View Demo</a>
    ·
-   <a href="https://github.com/sarkartanmay393/tsmk-dnd/issues">Report Bug</a>
+   <a href="https://github.com/sarkartanmay393/TaskNest/issues">Report Bug</a>
    ·
-   <a href="https://github.com/sarkartanmay393/tsmk-dnd/
+   <a href="https://github.com/sarkartanmay393/TaskNest/
 issues">Request Feature</a>
  </p>
 </div>
 
-TSMK-DND is a web application that allows users to manage their tasks and projects. The application provides a simple and intuitive interface for creating, organizing, and tracking tasks.
+TaskNest is a web application that allows users to manage their tasks and projects. The application provides a simple and intuitive interface for creating, organizing, and tracking tasks.
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -118,7 +118,7 @@ To run the application locally, follow these steps:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/sarkartanmay393/tsmk-dnd.git
+   git clone https://github.com/sarkartanmay393/TaskNest.git
    ```
 
 2. Run both command separately to setup the codebase:
@@ -166,7 +166,7 @@ Don't forget to give the project a star! Thanks again!
 5. Open a Pull Request
 6. Wait for review
 
-See the [open issues](https://github.com/sarkartanmay393/tsmk-dnd/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/sarkartanmay393/TaskNest/issues) for a full list of proposed features (and known issues).
 
 <!-- CONTACT -->
 
@@ -174,7 +174,7 @@ See the [open issues](https://github.com/sarkartanmay393/tsmk-dnd/issues) for a 
 
 Your Name - Tanmay Sarkar [@sarkartanmay393](https://twitter.com/sarkartanmay393) - [sarkartanmay393@gmail.com](mailto:sarkartanmay393@gmail.com)
 
-Project Link: [https://github.com/sarkartanmay393/tsmk-dnd](https://github.com/sarkartanmay393/tsmk-dnd)
+Project Link: [https://github.com/sarkartanmay393/TaskNest](https://github.com/sarkartanmay393/TaskNest)
 
 **Thanks for visiting my project. If you like it, please give it a star. It will help me a lot. Thanks again!**
 
@@ -184,11 +184,11 @@ Project Link: [https://github.com/sarkartanmay393/tsmk-dnd](https://github.com/s
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
 [forks-shield]: https://img.shields.io/github/forks/sarkartanmay393/CryptoConvert.svg?style=for-the-badge
-[forks-url]: https://github.com/sarkartanmay393/tsmk-dnd/network/members
+[forks-url]: https://github.com/sarkartanmay393/TaskNest/network/members
 [stars-shield]: https://img.shields.io/github/stars/sarkartanmay393/CryptoConvert.svg?style=for-the-badge
-[stars-url]: https://github.com/sarkartanmay393/tsmk-dnd/stargazers
+[stars-url]: https://github.com/sarkartanmay393/TaskNest/stargazers
 [issues-shield]: https://img.shields.io/github/issues/sarkartanmay393/CryptoConvert.svg?style=for-the-badge
-[issues-url]: https://github.com/sarkartanmay393/tsmk-dnd/issues
+[issues-url]: https://github.com/sarkartanmay393/TaskNest/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/tanmaysrkr
 [React.dev]: https://img.shields.io/badge/React-2496ed?style=for-the-badge&logo=react&logoColor=white
